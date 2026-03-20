@@ -13,11 +13,11 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
-                @if(Auth::user()->isAdmin())
+                @can('viewAny', App\Models\ActivityLog::class)
                 <flux:navbar.item icon="clipboard-document-list" :href="route('activity-log.index')" :current="request()->routeIs('activity-log.index')" wire:navigate>
                     {{ __('Activity Log') }}
                 </flux:navbar.item>
-                @endif
+                @endcan
             </flux:navbar>
 
             <flux:spacer />
@@ -68,11 +68,11 @@
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
                     </flux:sidebar.item>
-                    @if(Auth::user()->isAdmin())
+                    @can('viewAny', App\Models\ActivityLog::class)
                     <flux:sidebar.item icon="clipboard-document-list" :href="route('activity-log.index')" :current="request()->routeIs('activity-log.index')" wire:navigate>
                         {{ __('Activity Log')  }}
                     </flux:sidebar.item>
-                    @endif
+                    @endcan
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
