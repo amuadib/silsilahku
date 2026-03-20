@@ -30,6 +30,7 @@ new class extends Component {
     public function with(): array
     {
         $users = User::query()
+            ->when(!Auth::user()->isAdmin(), fn($q) => $q->whereIn('id', Auth::user()->getRelatedIds()))
             ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%')->orWhere('email', 'like', '%' . $this->search . '%'))
             ->when($this->jenis_kelamin, fn($q) => $q->where('jenis_kelamin', $this->jenis_kelamin))
             ->when($this->status !== '', fn($q) => $q->where('wafat', $this->status))

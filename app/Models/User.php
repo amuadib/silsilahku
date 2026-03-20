@@ -151,46 +151,75 @@ class User extends Authenticatable
         return $this->manager_id === Auth::user()->id;
     }
     /**
-     * Determine if the user has a family relationship with another user.
+     * Get an array of IDs for all users in the full lineage (all ancestors and all descendants).
+     * Also includes spouses and siblings of everyone in the lineage.
      */
+    public function getRelatedIds(): array
+    {
+        $relatedIds = [$this->id];
+        
+        // 1. All Ancestors (Iterative walk up)
+        $currentLayer = [$this->id];
+        while (!empty($currentLayer)) {
+            $parents = self::whereIn('id', $currentLayer)
+                ->where(function($q) {
+                    $q->whereNotNull('ayah_id')->orWhereNotNull('ibu_id');
+                })
+                ->get(['ayah_id', 'ibu_id'])
+                ->flatMap(fn($u) => [$u->ayah_id, $u->ibu_id])
+                ->filter()
+                ->unique()
+                ->toArray();
+                
+            $newParents = array_diff($parents, $relatedIds);
+            if (empty($newParents)) break;
+            
+            $relatedIds = array_merge($relatedIds, $newParents);
+            $currentLayer = $newParents;
+        }
+
+        // 2. All Descendants (Iterative walk down)
+        $currentLayer = [$this->id];
+        while (!empty($currentLayer)) {
+            $children = self::whereIn('ayah_id', $currentLayer)
+                ->orWhereIn('ibu_id', $currentLayer)
+                ->pluck('id')
+                ->toArray();
+                
+            $newChildren = array_diff($children, $relatedIds);
+            if (empty($newChildren)) break;
+            
+            $relatedIds = array_merge($relatedIds, $newChildren);
+            $currentLayer = $newChildren;
+        }
+        
+        // 3. Spouses and Siblings of everyone currently in relatedIds
+        // Using subqueries for better performance on larger sets
+        $siblings = self::whereIn('ortu_id', function($q) use ($relatedIds) {
+                $q->select('ortu_id')->from('users')->whereIn('id', $relatedIds)->whereNotNull('ortu_id');
+            })
+            ->pluck('id')
+            ->toArray();
+        $relatedIds = array_merge($relatedIds, $siblings);
+        
+        $spouseIds = Pernikahan::whereIn('suami_id', $relatedIds)->pluck('istri_id')
+            ->merge(Pernikahan::whereIn('istri_id', $relatedIds)->pluck('suami_id'))
+            ->toArray();
+        $relatedIds = array_merge($relatedIds, $spouseIds);
+        
+        // 4. Managed users (always visible to manager)
+        $managedIds = self::where('manager_id', $this->id)->pluck('id')->toArray();
+        $relatedIds = array_merge($relatedIds, $managedIds);
+
+        return array_values(array_unique(array_filter($relatedIds)));
+    }
+
     public function isRelatedTo(User $other): bool
     {
-        // 1. Same person
-        if ($this->id === $other->id) {
+        if ($this->isAdmin()) {
             return true;
         }
 
-        // 2. Manager (the one who created/manages this entry)
-        if ($this->id === $other->manager_id) {
-            return true;
-        }
-
-        // 3. Direct parents
-        if ($this->id === $other->ayah_id || $this->id === $other->ibu_id) {
-            return true;
-        }
-
-        // 4. Children (check if other is parent of $this)
-        if ($other->id === $this->ayah_id || $other->id === $this->ibu_id) {
-            return true;
-        }
-
-        // 5. Siblings (share same parents/pernikahan)
-        if ($this->ortu_id && $this->ortu_id === $other->ortu_id) {
-            return true;
-        }
-
-        // 6. Spouse
-        if ($this->jenis_kelamin == '1') {
-            if ($this->istri()->where('users.id', $other->id)->exists()) {
-                return true;
-            }
-        } else {
-            if ($this->suami()->where('users.id', $other->id)->exists()) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array($other->id, $this->getRelatedIds());
     }
 }
