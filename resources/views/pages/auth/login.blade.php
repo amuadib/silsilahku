@@ -1,5 +1,9 @@
 <x-layouts::auth :title="__('Log in')">
-    <div class="flex flex-col gap-6">
+    <div x-data="{ show: false }" x-init="setTimeout(() => show = true, 50)" x-show="show" 
+         x-transition:enter="transition ease-out duration-1000"
+         x-transition:enter-start="opacity-0 translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="flex flex-col gap-6">
         <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
 
         <!-- Session Status -->
