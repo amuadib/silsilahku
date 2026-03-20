@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model; 
+use App\Concerns\LogsActivity;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Pernikahan extends Model
 {
-    use HasUuids;
+    use HasUuids, LogsActivity;
     protected $table = 'pernikahan';
 
     protected $fillable = [

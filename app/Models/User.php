@@ -3,18 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Concerns\LogsActivity;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasUuids;
+    use HasFactory, Notifiable, TwoFactorAuthenticatable, HasUuids, LogsActivity;
+
+    /**
+     * Kolom sensitif yang tidak dicatat di activity log.
+     */
+    protected array $logExclude = ['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'];
 
     /**
      * The attributes that are mass assignable.
@@ -135,7 +142,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'manager_id', 'id');
     }
-
+    public function isAdmin()
+    {
+        return in_array($this->email, explode(';', env('ADMIN_EMAILS')));
+    }
     public function isManager()
     {
         return $this->manager_id === Auth::user()->id;
