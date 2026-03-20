@@ -215,7 +215,8 @@ new class extends Component {
             <flux:separator class="md:hidden" />
 
             <div class="flex-1 self-stretch max-md:pt-6">
-                <div class="w-full border">
+                @if(!$user->wafat)
+                <div class="w-full border mb-4">
                     <div class="flex items-center justify-between border-b">
                         <flux:heading size="xl" level="1" class="p-4">{{ __('Account') }}
                         </flux:heading>
@@ -251,7 +252,8 @@ new class extends Component {
                         </table>
                     @endif
                 </div>
-                <div class="mt-4 w-full border">
+@endif
+                <div class="w-full border">
                     <div class="flex items-center justify-between border-b">
                         <flux:heading size="lg" level="1" class="p-4">{{ __('Death') }}
                         </flux:heading>
