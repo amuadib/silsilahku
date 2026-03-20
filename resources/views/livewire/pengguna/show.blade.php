@@ -55,7 +55,7 @@ new class extends Component {
             $id = $this->addUser([
                 'name' => $this->userFromInput,
                 'jenis_kelamin' => $this->activeForm === 'ayah' || $this->activeForm === 'suami' ? '1' : '2',
-                'manager_id' => Auth::user()->id,
+                'manager_id' => Auth::id(),
             ]);
         }
         if ($this->activeForm === 'ayah') {
@@ -70,13 +70,13 @@ new class extends Component {
             Pernikahan::create([
                 'suami_id' => $id,
                 'istri_id' => $this->user->id,
-                'manager_id' => Auth::user()->id,
+                'manager_id' => Auth::id(),
             ]);
         } elseif ($this->activeForm === 'istri') {
             Pernikahan::create([
                 'suami_id' => $this->user->id,
                 'istri_id' => $id,
-                'manager_id' => Auth::user()->id,
+                'manager_id' => Auth::id(),
             ]);
         } elseif ($this->activeForm === 'orangtua') {
             $this->user->update([
@@ -100,7 +100,7 @@ new class extends Component {
                     'ortu_id' => $this->ortu_id,
                     'ayah_id' => $pernikahan->suami_id,
                     'ibu_id' => $pernikahan->istri_id,
-                    'manager_id' => Auth::user()->id,
+                    'manager_id' => Auth::id(),
                 ]);
             }
         }
@@ -122,6 +122,14 @@ new class extends Component {
     {
         $user = User::create($data);
         return $user->id;
+    }
+
+    public function delete($id)
+    {
+        $user = User::findOrFail($id);
+        $this->authorize('delete', $user);
+        $user->delete();
+        return $this->redirect(route('dashboard'), navigate: true);
     }
 };
 ?>

@@ -98,6 +98,16 @@
                                 </td>
                             </tr>
                         @endif
+                        @can('delete', $user)
+                            <tr>
+                                <td colspan="2" class="py-2 text-center px-4">
+                                    <flux:button color="red" class="cursor-pointer w-full" variant="primary"
+                                        wire:click="delete('{{ $user->id }}')"
+                                        wire:confirm="{{ __('Are you sure?') }}">{{ __('Delete') }}
+                                    </flux:button>
+                                </td>
+                            </tr>
+                        @endcan
                     </table>
                 </div>
             </div>

@@ -57,7 +57,7 @@ new class extends Component {
             'jenis_kelamin' => $validated['jenis_kelamin'],
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'anak_ke' => $validated['anak_ke'],
-            'manager_id' => Auth::user()->id,
+            'manager_id' => Auth::id(),
             'alamat' => $validated['alamat'],
             'hp' => $validated['hp'],
             'wafat' => $validated['wafat'],
@@ -100,6 +100,13 @@ new class extends Component {
 
         $this->dispatch('user-updated', name: $this->user->name);
         $this->redirect(route('pengguna.show', $this->user->id));
+    }
+
+    public function delete(User $user)
+    {
+        $this->authorize('delete', $user);
+        $user->delete();
+        return $this->redirect(route('dashboard'), navigate: true);
     }
 };
 ?>

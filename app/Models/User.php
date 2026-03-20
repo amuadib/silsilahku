@@ -138,6 +138,10 @@ class User extends Authenticatable
             return $this->hasMany(User::class, 'ortu_id', 'id')->where('id', '!=', $this->id);
     }
 
+    public function anak()
+    {
+        return $this->hasMany(User::class, 'ortu_id', 'id')->where('id', '!=', $this->id);
+    }
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id', 'id');

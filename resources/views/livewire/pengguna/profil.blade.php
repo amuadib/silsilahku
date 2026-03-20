@@ -29,6 +29,13 @@ new class extends Component {
             'ayah_input' => $this->userFromInput,
         ]);
     }
+
+    public function delete(User $user)
+    {
+        $this->authorize('delete', $user);
+        $user->delete();
+        return $this->redirect(route('dashboard'), navigate: true);
+    }
 };
 
 ?>
