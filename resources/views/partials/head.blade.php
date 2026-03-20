@@ -14,3 +14,9 @@
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
+
+{{-- Libraries for Family Tree (loaded once with wire:navigate) --}}
+<script src="{{ asset('js/raphael.min.js') }}" data-navigate-once></script>
+<script src="{{ asset('js/Treant.min.js') }}" data-navigate-once></script>
+
+@stack('styles')
