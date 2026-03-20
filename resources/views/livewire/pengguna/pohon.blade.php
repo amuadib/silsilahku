@@ -153,7 +153,7 @@ new class extends Component {
 
     <div id="tree-wrapper"
         x-ref="treeWrapper"
-        class="mt-4 min-h-[600px] overflow-x-auto rounded border bg-white p-8 shadow-sm dark:bg-zinc-900">
+        class="mt-4 min-h-[600px] overflow-x-auto rounded border bg-white p-0 shadow-sm dark:bg-zinc-900">
         <div x-ref="treeStructure" id="tree-structure" style="width: 100%; height: 100%;"></div>
     </div>
 </section>
@@ -223,18 +223,16 @@ new class extends Component {
             font-style: italic;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .node-laki {
-                background-color: #0c4a6e;
-                border-color: #0369a1;
-                color: #e0f2fe;
-            }
+        .dark .node-laki {
+            background-color: #0c4a6e;
+            border-color: #0369a1;
+            color: #e0f2fe;
+        }
 
-            .node-perempuan {
-                background-color: #831843;
-                border-color: #be185d;
-                color: #fce7f3;
-            }
+        .dark .node-perempuan {
+            background-color: #831843;
+            border-color: #be185d;
+            color: #fce7f3;
         }
 
         /* Fullscreen styles */
@@ -245,10 +243,8 @@ new class extends Component {
             padding: 40px !important;
         }
 
-        @media (prefers-color-scheme: dark) {
-            #tree-wrapper:fullscreen {
-                background-color: #18181b !important;
-            }
+        .dark #tree-wrapper:fullscreen {
+            background-color: #18181b !important;
         }
     </style>
 @endpush
