@@ -15,9 +15,10 @@ new class extends Component {
     public $alamat;
     public $hp;
     public $email;
+    public $password;
     public $wafat;
     public $showFormKematian = false;
-    public $showFormAkun = false;
+    public $accountIsActive=false;
 
     public function mount($id)
     {
@@ -34,7 +35,7 @@ new class extends Component {
             $this->showFormKematian = true;
         }
         if ($this->user->password != null) {
-            $this->showFormAkun = true;
+            $this->accountIsActive = true;
         }
     }
 
@@ -218,12 +219,14 @@ new class extends Component {
                     <div class="flex items-center justify-between border-b">
                         <flux:heading size="xl" level="1" class="p-4">{{ __('Account') }}
                         </flux:heading>
-                        @if (!$showFormAkun)
-                            <button wire:click="$set('showFormAkun', true)"
+                        @if (!$accountIsActive)
+                            <button wire:click="$set('accountIsActive', true)"
                                 class="float-right m-2 cursor-pointer rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700">{{ __('Activate') }}</button>
+                        @else
+                            <span class="float-right m-2 cursor-pointer rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">{{ __('Account is Active') }}</span>
                         @endif
                     </div>
-                    @if ($showFormAkun)
+                    @if (!$accountIsActive)
                         <table class="w-full text-left">
                             <tr class="border-b">
                                 <th class="w-40 px-4 py-2 text-gray-500">{{ __('Email') }}</th>
