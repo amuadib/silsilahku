@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
@@ -23,9 +23,33 @@
             <flux:spacer />
 
             <flux:navbar class="me-1.5 space-x-0.5 rtl:space-x-reverse py-0!">
-                <flux:tooltip :content="__('Search')" position="bottom">
+                {{-- <flux:tooltip :content="__('Search')" position="bottom">
                     <flux:navbar.item class="!h-10 [&>div>svg]:size-5" icon="magnifying-glass" href="#" :label="__('Search')" />
                 </flux:tooltip>
+
+                <flux:separator vertical variant="subtle" class="my-2" /> --}}
+
+                <div x-data="{ 
+                    appearance: localStorage.getItem('appearance') || 'system',
+                    dark: false,
+                    init() {
+                        this.dark = this.appearance === 'dark' || (this.appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                        this.update();
+                    },
+                    toggle() {
+                        this.appearance = this.dark ? 'light' : 'dark';
+                        this.dark = !this.dark;
+                        localStorage.setItem('appearance', this.appearance);
+                        this.update();
+                    },
+                    update() {
+                        if (this.dark) document.documentElement.classList.add('dark');
+                        else document.documentElement.classList.remove('dark');
+                    }
+                }" class="flex items-center">
+                    <flux:navbar.item x-show="!dark" icon="moon" x-on:click="toggle" variant="subtle" class="!h-10 [&>div>svg]:size-5 cursor-pointer" />
+                    <flux:navbar.item x-show="dark" icon="sun" x-on:click="toggle" variant="subtle" class="!h-10 [&>div>svg]:size-5 cursor-pointer" />
+                </div>
             </flux:navbar>
 @auth
             <x-desktop-user-menu />
