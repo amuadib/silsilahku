@@ -48,12 +48,12 @@ new class extends Component {
             {{-- Header --}}
             <div class="mb-6 flex items-center justify-between">
                 <div>
-                    <flux:heading size="xl" level="1">{{ __('User List') }}</flux:heading>
-                    <flux:subheading>{{ __('List of all users in the family tree.') }}</flux:subheading>
+                    <flux:heading size="xl" level="1">{{ __('Individual List') }}</flux:heading>
+                    <flux:subheading>{{ __('List of all individuals in the family tree') }}</flux:subheading>
                 </div>
-                <flux:button variant="primary" icon="plus" href="{{ route('profil') }}" wire:navigate>
+                {{-- <flux:button variant="primary" icon="plus" href="{{ route('profil') }}" wire:navigate>
                     {{ __('Add User') }}
-                </flux:button>
+                </flux:button> --}}
             </div>
 
             {{-- Filter --}}
