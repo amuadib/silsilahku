@@ -153,7 +153,7 @@ new class extends Component {
 
     <div id="tree-wrapper"
         x-ref="treeWrapper"
-        class="mt-4 min-h-[600px] overflow-x-auto rounded border bg-white p-0 shadow-sm dark:bg-zinc-900">
+        class="mt-4 min-h-[600px] overflow-auto rounded border bg-white p-0 shadow-sm dark:bg-zinc-900">
         <div x-ref="treeStructure" id="tree-structure" style="width: 100%; height: 100%;"></div>
     </div>
 </section>
