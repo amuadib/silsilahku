@@ -46,26 +46,30 @@ new class extends Component {
         $node = [
             'text' => [
                 'name' => $user->name . ' ' . $wafat,
-                // 'title' => $user->jenis_kelamin == '1' ? 'Laki-laki' : 'Perempuan',
                 'desc' => $desc,
             ],
             'link' => [
                 'href' => route('pengguna.pohon', $user->id),
-                'target' => '_self', // or _blank if they want it in a new tab, but usually self is better
+                'target' => '_self',
             ],
-            // HTMLclass will map to our CSS
             'HTMLclass' => $user->jenis_kelamin == '1' ? 'node-laki' : 'node-perempuan',
             'children' => [],
         ];
 
         // Fetch children
+        $hasChildren = false;
         foreach ($pernikahans as $p) {
             foreach ($p->anak as $anak) {
                 $childNode = $this->buildNode($anak, $visited);
                 if ($childNode) {
                     $node['children'][] = $childNode;
+                    $hasChildren = true;
                 }
             }
+        }
+
+        if ($hasChildren) {
+            $node['collapsable'] = true;
         }
 
         return $node;
@@ -85,6 +89,9 @@ new class extends Component {
                     'stroke' => '#9ca3af',
                 ],
             ],
+            'node' => [
+                'collapsable' => true,
+            ],
         ];
 
         $visited = [];
@@ -100,7 +107,8 @@ new class extends Component {
     }
 };
 ?>
-<section x-data="{ 
+        <section x-data="{ 
+            zoom: 1,
             initTreant(retryCount = 0) {
                 if (typeof Treant !== 'undefined') {
                     // Clear existing content to prevent duplicates or lingering nodes
@@ -134,10 +142,18 @@ new class extends Component {
                 {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
             </flux:subheading>
         </div>
-        <div class="flex gap-2">
+        <div class="flex items-center gap-2">
+            <flux:button.group variant="outline" class="mr-2">
+                <flux:button icon="plus" class="cursor-pointer" @click="zoom = Math.min(zoom + 0.1, 2)" />
+                <flux:button variant="filled" class="pointer-events-none w-14! px-0! text-xs!">
+                    <span x-text="Math.round(zoom * 100) + '%'"></span>
+                </flux:button>
+                <flux:button icon="minus" class="cursor-pointer" @click="zoom = Math.max(zoom - 0.1, 0.5)" />
+            </flux:button.group>
+
             <flux:button id="btn-fullscreen" @click="toggleFullscreen()" color="zinc" class="cursor-pointer" variant="outline">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="mr-1 inline-block h-5 w-5">
+                    stroke="currentColor" class="mr-1 h-5 w-5 inline-block">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
                 </svg>
@@ -154,7 +170,7 @@ new class extends Component {
     <div id="tree-wrapper"
         x-ref="treeWrapper"
         class="mt-4 min-h-[600px] overflow-auto rounded border bg-white p-0 shadow-sm dark:bg-zinc-900">
-        <div x-ref="treeStructure" id="tree-structure" style="width: 100%; height: 100%;"></div>
+        <div x-ref="treeStructure" id="tree-structure" :style="'zoom: ' + zoom + '; transition: zoom 0.2s;'"></div>
     </div>
 </section>
 
@@ -163,7 +179,7 @@ new class extends Component {
         /* Treant Core CSS (minified base) */
         .Treant {
             position: relative;
-            overflow: hidden;
+            overflow: visible !important; /* Crucial for collapsible switches */
             padding: 0 !important;
         }
 
@@ -245,6 +261,68 @@ new class extends Component {
 
         .dark #tree-wrapper:fullscreen {
             background-color: #18181b !important;
+        }
+
+        /* Collapsible toggle styles */
+        .collapse-switch {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            margin-left: -10px;
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 1px solid #9ca3af;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+            color: #4b5563;
+            transition: all 0.2s;
+        }
+
+        .collapse-switch:hover {
+            background-color: #f3f4f6;
+            transform: scale(1.1);
+        }
+
+        .collapsed .collapse-switch {
+            background-color: #4b5563;
+            color: #fff;
+        }
+
+        .collapse-switch::after {
+            content: "−";
+        }
+
+        .collapsed .collapse-switch::after {
+            content: "+";
+        }
+
+        .dark .collapse-switch {
+            background-color: #27272a;
+            border-color: #52525b;
+            color: #d4d4d8;
+        }
+
+        #tree-structure {
+            padding: 80px; /* Increased padding to prevent clipping at edges */
+            box-sizing: border-box;
+            min-width: fit-content;
+            min-height: fit-content;
+        }
+
+        /* Make nodes look interactive */
+        .node-laki, .node-perempuan {
+            cursor: default;
+        }
+        
+        .Treant .node.collapsable {
+            cursor: pointer;
         }
     </style>
 @endpush
