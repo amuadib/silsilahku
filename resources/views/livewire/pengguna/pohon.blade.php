@@ -100,7 +100,31 @@ new class extends Component {
     }
 };
 ?>
-<section class="item-center mx-auto w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
+<section x-data="{ 
+            initTreant(retryCount = 0) {
+                if (typeof Treant !== 'undefined') {
+                    // Clear existing content to prevent duplicates or lingering nodes
+                    this.$refs.treeStructure.innerHTML = '';
+                    new Treant(@js($treeData));
+                } else if (retryCount < 10) {
+                    // If Treant is not ready, retry in 100ms
+                    setTimeout(() => this.initTreant(retryCount + 1), 100);
+                }
+            },
+            toggleFullscreen() {
+                let elem = this.$refs.treeWrapper;
+                if (!document.fullscreenElement) {
+                    if (elem.requestFullscreen) { elem.requestFullscreen(); }
+                    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
+                    else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+                } else {
+                    if (document.exitFullscreen) { document.exitFullscreen(); }
+                }
+            }
+        }"
+    x-init="initTreant();"
+    x-on:livewire:navigated.window="initTreant()"
+    class="item-center mx-auto w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
     <div class="relative my-6 flex w-full items-center justify-between border-b pb-4">
         <div>
             <flux:heading size="xl" level="1">
@@ -111,7 +135,7 @@ new class extends Component {
             </flux:subheading>
         </div>
         <div class="flex gap-2">
-            <flux:button id="btn-fullscreen" color="zinc" class="cursor-pointer" variant="outline">
+            <flux:button id="btn-fullscreen" @click="toggleFullscreen()" color="zinc" class="cursor-pointer" variant="outline">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="mr-1 inline-block h-5 w-5">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -128,223 +152,103 @@ new class extends Component {
     </div>
 
     <div id="tree-wrapper"
+        x-ref="treeWrapper"
         class="mt-4 min-h-[600px] overflow-x-auto rounded border bg-white p-8 shadow-sm dark:bg-zinc-900">
-        <div id="tree-structure" style="width: 100%; height: 100%;"></div>
+        <div x-ref="treeStructure" id="tree-structure" style="width: 100%; height: 100%;"></div>
     </div>
 </section>
 
-<style>
-    /* Treant Core CSS (minified base) */
-    .Treant {
-        position: relative;
-        overflow: hidden;
-        padding: 0 !important;
-    }
+@push('styles')
+    <style>
+        /* Treant Core CSS (minified base) */
+        .Treant {
+            position: relative;
+            overflow: hidden;
+            padding: 0 !important;
+        }
 
-    .Treant>.node,
-    .Treant>.pseudo {
-        position: absolute;
-        display: block;
-        visibility: hidden;
-    }
+        .Treant>.node,
+        .Treant>.pseudo {
+            position: absolute;
+            display: block;
+            visibility: hidden;
+        }
 
-    .Treant.Treant-loaded .node,
-    .Treant.Treant-loaded .pseudo {
-        visibility: visible;
-    }
+        .Treant.Treant-loaded .node,
+        .Treant.Treant-loaded .pseudo {
+            visibility: visible;
+        }
 
-    .Treant>.pseudo {
-        width: 0;
-        height: 0;
-        border: none;
-        padding: 0;
-    }
+        .Treant>.pseudo {
+            width: 0;
+            height: 0;
+            border: none;
+            padding: 0;
+        }
 
-    .Treant .collapse-switch {
-        width: 3px;
-        height: 3px;
-        display: block;
-        border: 1px solid black;
-        position: absolute;
-        top: 1px;
-        right: 1px;
-        cursor: pointer;
-    }
+        .node-laki,
+        .node-perempuan {
+            padding: 12px;
+            border-radius: 8px;
+            width: 160px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: inherit;
+        }
 
-    .Treant .collapsed .collapse-switch {
-        background-color: #868DEE;
-    }
-
-    .Treant>.node img {
-        border: none;
-        float: left;
-    }
-
-    /* Custom Node Styling */
-    .node-laki,
-    .node-perempuan {
-        padding: 12px;
-        border-radius: 8px;
-        width: 160px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        font-family: inherit;
-    }
-
-    .node-laki {
-        background-color: #e0f2fe;
-        /* Tailwind sky-100 */
-        border: 2px solid #7dd3fc;
-        /* Tailwind sky-300 */
-        color: #0c4a6e;
-        /* Tailwind sky-900 */
-    }
-
-    .node-perempuan {
-        background-color: #fce7f3;
-        /* Tailwind pink-100 */
-        border: 2px solid #f9a8d4;
-        /* Tailwind pink-300 */
-        color: #831843;
-        /* Tailwind pink-900 */
-    }
-
-    .Treant .node-name {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 4px;
-        white-space: normal;
-        word-wrap: break-word;
-        /* Ensure long names wrap properly */
-    }
-
-    .Treant .node-title {
-        font-size: 12px;
-        opacity: 0.8;
-    }
-
-    .Treant .node-desc {
-        font-size: 11px;
-        opacity: 0.9;
-        margin-top: 4px;
-        font-style: italic;
-    }
-
-    /* Dark mode support - matching colors to Tailwind dark equivalents */
-    @media (prefers-color-scheme: dark) {
         .node-laki {
-            background-color: #0c4a6e;
-            border-color: #0369a1;
-            color: #e0f2fe;
+            background-color: #e0f2fe;
+            border: 2px solid #7dd3fc;
+            color: #0c4a6e;
         }
 
         .node-perempuan {
-            background-color: #831843;
-            border-color: #be185d;
-            color: #fce7f3;
-        }
-    }
-
-    /* Fullscreen specific styles */
-    #tree-wrapper:-webkit-full-screen {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: none !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        overflow: auto !important;
-        background-color: white !important;
-    }
-
-    #tree-wrapper:-moz-full-screen {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: none !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        overflow: auto !important;
-        background-color: white !important;
-    }
-
-    #tree-wrapper:fullscreen {
-        width: 100vw !important;
-        height: 100vh !important;
-        max-width: none !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        overflow: auto !important;
-        background-color: white !important;
-    }
-
-    @media (prefers-color-scheme: dark) {
-
-        #tree-wrapper:fullscreen,
-        #tree-wrapper:-webkit-full-screen,
-        #tree-wrapper:-moz-full-screen {
-            background-color: #18181b !important;
-            /* zinc-900 */
-        }
-    }
-</style>
-
-<script src="{{ asset('js/raphael.min.js') }}"></script>
-<script src="{{ asset('js/Treant.min.js') }}"></script>
-<script>
-    document.addEventListener('livewire:initialized', () => {
-        initTreant();
-    });
-
-    document.addEventListener('livewire:navigated', () => {
-        initTreant();
-    });
-
-    // Fallback for regular page load
-    document.addEventListener('DOMContentLoaded', () => {
-        initTreant();
-    });
-
-    function initTreant() {
-        if (typeof Treant !== 'undefined' && document.getElementById('tree-structure') && !document.getElementById(
-                'tree-structure').hasChildNodes()) {
-            const treeData = @json($treeData);
-            new Treant(treeData);
+            background-color: #fce7f3;
+            border: 2px solid #f9a8d4;
+            color: #831843;
         }
 
-        const btnFullscreen = document.getElementById('btn-fullscreen');
-        const treeWrapper = document.getElementById('tree-wrapper');
-
-        if (btnFullscreen && treeWrapper) {
-            // Remove old listener if exists (due to livewire navigating)
-            const newBtnFullscreen = btnFullscreen.cloneNode(true);
-            btnFullscreen.parentNode.replaceChild(newBtnFullscreen, btnFullscreen);
-
-            newBtnFullscreen.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    if (treeWrapper.requestFullscreen) {
-                        treeWrapper.requestFullscreen().catch(err => {
-                            console.error(
-                                `Error attempting to enable fullscreen mode: ${err.message} (${err.name})`
-                            );
-                        });
-                    } else if (treeWrapper.webkitRequestFullscreen) {
-                        /* Safari */
-                        treeWrapper.webkitRequestFullscreen();
-                    } else if (treeWrapper.msRequestFullscreen) {
-                        /* IE11 */
-                        treeWrapper.msRequestFullscreen();
-                    }
-                } else {
-                    if (document.exitFullscreen) {
-                        document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) {
-                        /* Safari */
-                        document.webkitExitFullscreen();
-                    } else if (document.msExitFullscreen) {
-                        /* IE11 */
-                        document.msExitFullscreen();
-                    }
-                }
-            });
+        .Treant .node-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: normal;
+            word-wrap: break-word;
         }
-    }
-</script>
+
+        .Treant .node-desc {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .node-laki {
+                background-color: #0c4a6e;
+                border-color: #0369a1;
+                color: #e0f2fe;
+            }
+
+            .node-perempuan {
+                background-color: #831843;
+                border-color: #be185d;
+                color: #fce7f3;
+            }
+        }
+
+        /* Fullscreen styles */
+        #tree-wrapper:fullscreen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: white !important;
+            padding: 40px !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            #tree-wrapper:fullscreen {
+                background-color: #18181b !important;
+            }
+        }
+    </style>
+@endpush
