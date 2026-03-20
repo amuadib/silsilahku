@@ -105,6 +105,7 @@ new class extends Component {
             }
         }
         $this->resetAll();
+        $this->dispatch('notify', message: __('Data saved successfully.'), type: 'success');
     }
 
     private function resetAll()
@@ -128,7 +129,11 @@ new class extends Component {
     {
         $user = User::findOrFail($id);
         $this->authorize('delete', $user);
+        if ($user->pernikahan()->count() > 0) {
+            Pernikahan::where('suami_id', $user->id)->orWhere('istri_id', $user->id)->delete();
+        }
         $user->delete();
+        session()->flash('success', __('Data deleted successfully.'));
         return $this->redirect(route('dashboard'), navigate: true);
     }
 };

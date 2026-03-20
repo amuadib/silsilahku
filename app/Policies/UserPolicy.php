@@ -44,7 +44,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        return $user->isRelatedTo($model) && $user->id !== $model->id && $model->anak()->count() === 0 && $model->pernikahan()->count() === 0;
+        return $user->isRelatedTo($model) && $user->id !== $model->id && $model->anak()->count() === 0;
     }
 
     /**

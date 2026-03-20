@@ -28,12 +28,14 @@ new class extends Component {
             'ayah_id' => $this->userFromSelection,
             'ayah_input' => $this->userFromInput,
         ]);
+        $this->dispatch('notify', message: __('Profile updated successfully.'), type: 'success');
     }
 
     public function delete(User $user)
     {
         $this->authorize('delete', $user);
         $user->delete();
+        session()->flash('success', __('Data deleted successfully.'));
         return $this->redirect(route('dashboard'), navigate: true);
     }
 };

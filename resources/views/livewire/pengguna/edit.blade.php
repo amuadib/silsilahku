@@ -70,6 +70,7 @@ new class extends Component {
         $this->user->update($data);
 
         $this->dispatch('user-updated', name: $this->user->name);
+        Flux::toast(__('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -87,6 +88,7 @@ new class extends Component {
         $this->user->update($validated);
 
         $this->dispatch('user-updated', name: $this->user->name);
+        Flux::toast(__('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -99,6 +101,7 @@ new class extends Component {
         $this->user->update($validated);
 
         $this->dispatch('user-updated', name: $this->user->name);
+        Flux::toast(__('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -106,6 +109,7 @@ new class extends Component {
     {
         $this->authorize('delete', $user);
         $user->delete();
+        session()->flash('success', __('Data deleted successfully.'));
         return $this->redirect(route('dashboard'), navigate: true);
     }
 };
