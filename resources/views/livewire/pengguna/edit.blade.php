@@ -132,7 +132,7 @@ new class extends Component {
         <flux:separator variant="subtle" />
         <flux:heading class="sr-only">{{ __('Edit') }}</flux:heading>
         <div class="mt-4 flex items-start gap-5 max-md:flex-col">
-            <div class="flex-2 self-stretch border max-md:pt-6">
+            <div class="flex-1 self-stretch border max-md:pt-6">
                 <flux:heading size="xl" level="1" class="border-b p-4">{{ __('Profile') }}
                 </flux:heading>
 
