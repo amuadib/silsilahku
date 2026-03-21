@@ -9,8 +9,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+use App\Traits\HasToast;
+
 new class extends Component {
-    use WithFileUploads;
+    use WithFileUploads, HasToast;
 
     public $file;
     public $includeLogs = true;
@@ -41,7 +43,7 @@ new class extends Component {
             $zipPath = $backupService->createZipBackup($this->includeLogs);
             return response()->download($zipPath)->deleteFileAfterSend(true);
         } catch (\Exception $e) {
-            session()->flash('error', $e->getMessage());
+            $this->toastError($e->getMessage());
         }
     }
 
@@ -92,11 +94,11 @@ new class extends Component {
                 'ip_address' => request()->ip(),
             ]);
 
-            session()->flash('success', 'Database successfully imported.');
+            $this->toastSuccess(__('Database successfully imported.'));
             $this->reset('file');
         } catch (\Exception $e) {
             DB::rollBack();
-            session()->flash('error', 'Import failed: ' . $e->getMessage());
+            $this->toastError(__('Import failed: ') . $e->getMessage());
         }
     }
 
@@ -160,19 +162,7 @@ new class extends Component {
                 </div>
             </div>
 
-            @if (session('success'))
-                <div
-                    class="mb-4 rounded border border-green-300 bg-green-50 px-4 py-3 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div
-                    class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300">
-                    {{ session('error') }}
-                </div>
-            @endif
+            </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {{-- Export Card --}}
@@ -231,5 +221,6 @@ new class extends Component {
                 </flux:card>
             </div>
         </flux:main>
+    @include('partials.toast-bridge')
     </div>
 </section>

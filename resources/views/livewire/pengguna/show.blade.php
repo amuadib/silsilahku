@@ -3,8 +3,10 @@
 use Livewire\Volt\Component;
 use App\Models\User;
 use App\Models\Pernikahan;
+use App\Traits\HasToast;
 
 new class extends Component {
+    use HasToast;
     public User $user;
     public ?string $activeForm = null;
     public $userLakiLaki;
@@ -105,7 +107,8 @@ new class extends Component {
             }
         }
         $this->resetAll();
-        $this->dispatch('notify', message: __('Data saved successfully.'), type: 'success');
+        $this->toastSuccess(__('Data saved successfully.'));
+        $this->resetAll();
     }
 
     private function resetAll()
@@ -133,7 +136,7 @@ new class extends Component {
             Pernikahan::where('suami_id', $user->id)->orWhere('istri_id', $user->id)->delete();
         }
         $user->delete();
-        session()->flash('success', __('Data deleted successfully.'));
+        $this->toastSuccess(__('Data deleted successfully.'));
         return $this->redirect(route('dashboard'), navigate: true);
     }
 };

@@ -86,7 +86,9 @@
         <div x-data="{ 
                 notifications: [], 
                 add(n) { 
-                    let id = Date.now();
+                    if (!n || !n.message) return;
+                    if (this.notifications.some(i => i.message === n.message)) return;
+                    let id = Date.now() + Math.random();
                     this.notifications.push({ id, ...n }); 
                     setTimeout(() => { this.notifications = this.notifications.filter(i => i.id !== id) }, 5000); 
                 } 

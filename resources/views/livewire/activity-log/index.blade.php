@@ -5,7 +5,7 @@ use Livewire\Volt\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
-    use WithPagination;
+    use WithPagination, \App\Traits\HasToast;
 
     public string $search = '';
     public string $action = '';
@@ -62,7 +62,7 @@ new class extends Component {
         $query->delete();
 
         $this->resetPage();
-        session()->flash('success', 'Log berhasil dibersihkan.');
+        $this->toastSuccess(__('Log berhasil dibersihkan.'));
     }
 
     /** Daftar model unik untuk filter dropdown */
@@ -109,13 +109,6 @@ new class extends Component {
                     {{ __('Clear Logs') }}
                 </flux:button>
             </div>
-
-            @if (session('success'))
-                <div
-                    class="mb-4 rounded border border-green-300 bg-green-50 px-4 py-3 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300">
-                    {{ session('success') }}
-                </div>
-            @endif
 
             {{-- Filter --}}
             <div class="mb-4 flex flex-wrap gap-3">
@@ -317,5 +310,6 @@ new class extends Component {
                 </div>
             @endif
         </flux:modal>
+    @include('partials.toast-bridge')
     </div>
 </section>

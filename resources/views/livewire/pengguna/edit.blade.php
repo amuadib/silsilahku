@@ -3,9 +3,10 @@
 use Livewire\Volt\Component;
 use App\Models\User;
 use Livewire\WithFileUploads;
+use App\Traits\HasToast;
 
 new class extends Component {
-    use WithFileUploads;
+    use WithFileUploads, HasToast;
     public $user;
     public $name;
     public $newFoto; // hanya untuk upload baru
@@ -72,8 +73,7 @@ new class extends Component {
         }
 
         $this->user->update($data);
-
-        session()->flash('success', __('Data updated successfully.'));
+        $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -90,7 +90,7 @@ new class extends Component {
 
         $this->user->update($validated);
 
-        session()->flash('success', __('Data updated successfully.'));
+        $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -102,7 +102,7 @@ new class extends Component {
 
         $this->user->update($validated);
 
-        session()->flash('success', __('Data updated successfully.'));
+        $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -110,7 +110,7 @@ new class extends Component {
     {
         $this->authorize('delete', $user);
         $user->delete();
-        session()->flash('success', __('Data deleted successfully.'));
+        $this->toastSuccess(__('Data deleted successfully.'));
         return $this->redirect(route('dashboard'), navigate: true);
     }
 };

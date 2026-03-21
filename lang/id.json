@@ -126,5 +126,7 @@
     "Database successfully imported.": "Database berhasil diimpor.",
     "Import failed: ": "Impor gagal: ",
     "Select existing Address": "Pilih dari Alamat yang Sudah Ada",
-    "Data updated successfully.": "Data berhasil diubah."
+    "Data updated successfully.": "Data berhasil disimpan.",
+    "Data saved successfully.": "Data berhasil disimpan.",
+    "Data deleted successfully.": "Data berhasil dihapus."
 }

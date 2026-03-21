@@ -329,5 +329,6 @@
                 </div>
             </div>
         </div>
+    @include('partials.toast-bridge')
     </div>
 </section>
