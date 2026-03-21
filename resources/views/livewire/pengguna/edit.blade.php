@@ -13,6 +13,8 @@ new class extends Component {
     public $tanggal_lahir;
     public $anak_ke;
     public $alamat;
+    public $alamat_list;
+    public $alamat_list_selected;
     public $hp;
     public $email;
     public $password;
@@ -28,6 +30,7 @@ new class extends Component {
         $this->tanggal_lahir = $this->user->tanggal_lahir?->format('Y-m-d');
         $this->anak_ke = $this->user->anak_ke;
         $this->alamat = $this->user->alamat;
+        $this->alamat_list = User::where('alamat', '!=', '')->orderBy('alamat', 'asc')->pluck('alamat')->unique();
         $this->hp = $this->user->hp;
         $this->email = $this->user->email;
         $this->wafat = $this->user->wafat;
@@ -48,6 +51,7 @@ new class extends Component {
             'tanggal_lahir' => 'nullable|date',
             'anak_ke' => 'nullable|numeric',
             'alamat' => 'nullable|string|max:255',
+            'alamat_list_selected' => 'nullable|string|max:255',
             'hp' => 'nullable|string|max:255',
             'wafat' => 'nullable|boolean',
         ]);
@@ -58,7 +62,7 @@ new class extends Component {
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'anak_ke' => $validated['anak_ke'],
             'manager_id' => Auth::id(),
-            'alamat' => $validated['alamat'],
+            'alamat' => $validated['alamat_list_selected'] ?? $validated['alamat'],
             'hp' => $validated['hp'],
             'wafat' => $validated['wafat'],
         ];
@@ -69,8 +73,7 @@ new class extends Component {
 
         $this->user->update($data);
 
-        $this->dispatch('user-updated', name: $this->user->name);
-        Flux::toast(__('Data updated successfully.'));
+        session()->flash('success', __('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -87,8 +90,7 @@ new class extends Component {
 
         $this->user->update($validated);
 
-        $this->dispatch('user-updated', name: $this->user->name);
-        Flux::toast(__('Data updated successfully.'));
+        session()->flash('success', __('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -100,8 +102,7 @@ new class extends Component {
 
         $this->user->update($validated);
 
-        $this->dispatch('user-updated', name: $this->user->name);
-        Flux::toast(__('Data updated successfully.'));
+        session()->flash('success', __('Data updated successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
 
@@ -192,6 +193,12 @@ new class extends Component {
                     <tr class="border-b">
                         <th class="w-40 px-4 py-2 text-gray-500">{{ __('Address') }}</th>
                         <td class="px-4 py-2">
+                            <select wire:model="alamat_list_selected" class="w-full rounded border p-2">
+                                <option value="">{{ __('Select existing Address') }}</option>
+                                @foreach ($alamat_list as $alamat)
+                                    <option value="{{ $alamat }}">{{ $alamat }}</option>
+                                @endforeach
+                            </select>
                             <textarea wire:model="alamat" rows="3" class="w-full rounded border p-2"></textarea>
                         </td>
                     </tr>

@@ -124,5 +124,7 @@
     "Restore Database": "Pulihkan Database",
     "Processing...": "Memproses...",
     "Database successfully imported.": "Database berhasil diimpor.",
-    "Import failed: ": "Impor gagal: "
+    "Import failed: ": "Impor gagal: ",
+    "Select existing Address": "Pilih dari Alamat yang Sudah Ada",
+    "Data updated successfully.": "Data berhasil diubah."
 }
