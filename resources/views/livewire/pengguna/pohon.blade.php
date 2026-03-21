@@ -11,7 +11,7 @@ new class extends Component {
         $this->user = User::findOrFail($id);
     }
 
-    private function buildNode(User $user, &$visited = [])
+    private function buildNode(User $user, &$visited = [], $depth = 0)
     {
         // Prevent infinite recursion if data is corrupted
         if (in_array($user->id, $visited)) {
@@ -60,7 +60,7 @@ new class extends Component {
         $hasChildren = false;
         foreach ($pernikahans as $p) {
             foreach ($p->anak as $anak) {
-                $childNode = $this->buildNode($anak, $visited);
+                $childNode = $this->buildNode($anak, $visited, $depth + 1);
                 if ($childNode) {
                     $node['children'][] = $childNode;
                     $hasChildren = true;
@@ -70,6 +70,9 @@ new class extends Component {
 
         if ($hasChildren) {
             $node['collapsable'] = true;
+            if ($depth > 0) {
+                $node['collapsed'] = true;
+            }
         }
 
         return $node;
@@ -109,6 +112,11 @@ new class extends Component {
 ?>
         <section x-data="{ 
             zoom: 1,
+            isDragging: false, 
+            startX: 0, 
+            startY: 0, 
+            scrollLeft: 0, 
+            scrollTop: 0,
             initTreant(retryCount = 0) {
                 if (typeof Treant !== 'undefined') {
                     // Clear existing content to prevent duplicates or lingering nodes
@@ -128,6 +136,35 @@ new class extends Component {
                 } else {
                     if (document.exitFullscreen) { document.exitFullscreen(); }
                 }
+            },
+            startDragging(e) {
+                if (e.target.closest('.node') || e.target.closest('.collapse-switch')) return;
+                this.isDragging = true;
+                const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+                const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+                this.startX = pageX - this.$refs.treeWrapper.offsetLeft;
+                this.startY = pageY - this.$refs.treeWrapper.offsetTop;
+                this.scrollLeft = this.$refs.treeWrapper.scrollLeft;
+                this.scrollTop = this.$refs.treeWrapper.scrollTop;
+                this.$refs.treeWrapper.style.cursor = 'grabbing';
+                this.$refs.treeWrapper.style.userSelect = 'none';
+            },
+            stopDragging() {
+                this.isDragging = false;
+                this.$refs.treeWrapper.style.cursor = 'grab';
+                this.$refs.treeWrapper.style.userSelect = 'auto';
+            },
+            moveDragging(e) {
+                if (!this.isDragging) return;
+                if (e.touches) e.preventDefault(); 
+                const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+                const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+                const x = pageX - this.$refs.treeWrapper.offsetLeft;
+                const y = pageY - this.$refs.treeWrapper.offsetTop;
+                const walkX = (x - this.startX) * 1.5;
+                const walkY = (y - this.startY) * 1.5;
+                this.$refs.treeWrapper.scrollLeft = this.scrollLeft - walkX;
+                this.$refs.treeWrapper.scrollTop = this.scrollTop - walkY;
             }
         }"
     x-init="initTreant();"
@@ -169,7 +206,14 @@ new class extends Component {
 
     <div id="tree-wrapper"
         x-ref="treeWrapper"
-        class="mt-4 min-h-[600px] overflow-auto rounded border bg-white p-0 shadow-sm dark:bg-zinc-900">
+        @mousedown="startDragging($event)"
+        @mousemove="moveDragging($event)"
+        @mouseup="stopDragging()"
+        @mouseleave="stopDragging()"
+        @touchstart="startDragging($event)"
+        @touchmove="moveDragging($event)"
+        @touchend="stopDragging()"
+        class="mt-4 overflow-auto rounded min-h-[600px] bg-white p-0 dark:bg-zinc-900 cursor-grab">
         <div x-ref="treeStructure" id="tree-structure" :style="'zoom: ' + zoom + '; transition: zoom 0.2s;'"></div>
     </div>
 </section>
