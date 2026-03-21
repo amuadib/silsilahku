@@ -204,18 +204,18 @@
                             <tr class="">
                                 <th class="px-4 text-gray-500">{{ __('Wife') }}</th>
                                 <td class="py-2 flex justify-between">
-                                    @if ($user->istri)
-                                        <div class="flex flex-col">
+                                    <div class="flex flex-col">
+                                        @if ($user->istri)
                                             @foreach ($user->istri as $istri)
                                                 <a href="{{ route('pengguna.show', $istri->id) }}"
-                                                    class="text-blue-600 hover:underline inline-block">
+                                                    class="text-blue-600 hover:underline">
                                                     {{ $istri->name }} {{ $istri->wafat == true ? '(Alm)' : '' }}
                                                 </a>
                                             @endforeach
-                                        </div>
-                                    @else
-                                        -
-                                    @endif
+                                        @else
+                                            -
+                                        @endif
+                                    </div>
                                     @if ($activeForm === 'istri')
                                         @include('livewire.pengguna.form', ['userList' => $userPerempuan])
                                     @else
@@ -232,17 +232,19 @@
                         @else
                             <tr class="">
                                 <th class="px-4 text-gray-500">{{ __('Husband') }}</th>
-                                <td class="py-2">
-                                    @if ($user->suami)
-                                        @foreach ($user->suami as $suami)
-                                            <a href="{{ route('pengguna.show', $suami->id) }}"
-                                                class="text-blue-600 hover:underline">
-                                                {{ $suami->name }} {{ $suami->wafat == true ? '(Alm)' : '' }}
-                                            </a>
-                                        @endforeach
-                                    @else
-                                        -
-                                    @endif
+                                <td class="py-2 flex justify-between">
+                                    <div class="flex flex-col">
+                                        @if ($user->suami)
+                                            @foreach ($user->suami as $suami)
+                                                <a href="{{ route('pengguna.show', $suami->id) }}"
+                                                    class="text-blue-600 hover:underline">
+                                                    {{ $suami->name }} {{ $suami->wafat == true ? '(Alm)' : '' }}
+                                                </a>
+                                            @endforeach
+                                        @else
+                                            -
+                                        @endif
+                                    </div>
                                     @if ($activeForm === 'suami')
                                         @include('livewire.pengguna.form', ['userList' => $userLakiLaki])
                                     @else
