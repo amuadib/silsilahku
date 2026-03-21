@@ -203,8 +203,9 @@
                         @if ($user->jenis_kelamin == '1')
                             <tr class="">
                                 <th class="px-4 text-gray-500">{{ __('Wife') }}</th>
-                                <td class="py-2 flex justify-between">
-                                    <div class="flex flex-col">
+                                <td class="py-2">
+                                    <div class="flex justify-between">
+                                        <div class="flex flex-col">
                                         @if ($user->istri)
                                             @foreach ($user->istri as $istri)
                                                 <a href="{{ route('pengguna.show', $istri->id) }}"
@@ -215,10 +216,8 @@
                                         @else
                                             -
                                         @endif
-                                    </div>
-                                    @if ($activeForm === 'istri')
-                                        @include('livewire.pengguna.form', ['userList' => $userPerempuan])
-                                    @else
+                                        </div>
+                                        @if($activeForm !== 'istri')
                                         @can('update', $user)
                                             <div class="float-right text-sm">
                                                 <button class="mr-2 cursor-pointer text-blue-600 hover:underline"
@@ -226,13 +225,19 @@
                                                     {{ __('Add Wife') }}</button>
                                             </div>
                                         @endcan
+                                        @endif
+                                    </div>
+                                    
+                                    @if ($activeForm === 'istri')
+                                        @include('livewire.pengguna.form', ['userList' => $userPerempuan])                                        
                                     @endif
                                 </td>
                             </tr>
                         @else
                             <tr class="">
                                 <th class="px-4 text-gray-500">{{ __('Husband') }}</th>
-                                <td class="py-2 flex justify-between">
+                                <td class="py-2">
+                                    <div class="flex justify-between">
                                     <div class="flex flex-col">
                                         @if ($user->suami)
                                             @foreach ($user->suami as $suami)
@@ -245,16 +250,18 @@
                                             -
                                         @endif
                                     </div>
-                                    @if ($activeForm === 'suami')
-                                        @include('livewire.pengguna.form', ['userList' => $userLakiLaki])
-                                    @else
-                                        @can('update', $user)
+                                    @if($activeForm !== 'suami')
+                                    @can('update', $user)
                                             <div class="float-right text-sm">
                                                 <button class="mr-2 cursor-pointer text-blue-600 hover:underline"
                                                     wire:click="setHubungan('suami')">
                                                     {{ __('Add Husband') }}</button>
                                             </div>
                                         @endcan
+                                        @endif
+                                    </div>
+                                    @if ($activeForm === 'suami')
+                                        @include('livewire.pengguna.form', ['userList' => $userLakiLaki])
                                     @endif
                                 </td>
                             </tr>
