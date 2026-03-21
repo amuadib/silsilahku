@@ -162,8 +162,6 @@ new class extends Component {
                 </div>
             </div>
 
-            </div>
-
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 {{-- Export Card --}}
                 <flux:card>
