@@ -203,14 +203,16 @@
                         @if ($user->jenis_kelamin == '1')
                             <tr class="">
                                 <th class="px-4 text-gray-500">{{ __('Wife') }}</th>
-                                <td class="py-2">
+                                <td class="py-2 flex justify-between">
                                     @if ($user->istri)
-                                        @foreach ($user->istri as $istri)
-                                            <a href="{{ route('pengguna.show', $istri->id) }}"
-                                                class="text-blue-600 hover:underline">
-                                                {{ $istri->name }} {{ $istri->wafat == true ? '(Alm)' : '' }}
-                                            </a>
-                                        @endforeach
+                                        <div class="flex flex-col">
+                                            @foreach ($user->istri as $istri)
+                                                <a href="{{ route('pengguna.show', $istri->id) }}"
+                                                    class="text-blue-600 hover:underline inline-block">
+                                                    {{ $istri->name }} {{ $istri->wafat == true ? '(Alm)' : '' }}
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     @else
                                         -
                                     @endif
