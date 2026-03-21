@@ -11,6 +11,7 @@ Volt::route('/', 'dashboard')->name('dashboard');
     Volt::route('activity-log', 'activity-log.index')
         ->name('activity-log.index')
         ->middleware('can:viewAny,App\Models\ActivityLog');
+    Volt::route('database', 'database.management')->name('database.management');
     Volt::route('pengguna/{id}', 'pengguna.show')->name('pengguna.show');
 });
 

@@ -109,5 +109,20 @@
     "View Tree": "Lihat Silsilah",
     "List of all individuals in the family tree": "Daftar semua individu dalam silsilah keluarga",
     "Individual List": "Daftar Individu",
-    "Are you sure?": "Yakin ingin menghapus data ini?"
+    "Are you sure?": "Yakin ingin menghapus data ini?",
+    "Database": "Database",
+    "Database Management": "Manajemen Database",
+    "Backup and Restore your family tree data.": "Cadangkan dan Pulihkan data silsilah keluarga Anda.",
+    "Export Data": "Ekspor Data",
+    "Download a copy of the database. JSON contains records only, while ZIP includes profile photos.": "Unduh salinan database. JSON hanya berisi catatan, sedangkan ZIP menyertakan foto profil.",
+    "Include Activity Logs": "Sertakan Riwayat Aktivitas",
+    "Export JSON": "Ekspor JSON",
+    "Export ZIP": "Ekspor ZIP",
+    "Import Data": "Impor Data",
+    "Upload a previously exported JSON or ZIP file to restore the database.": "Unggah file JSON atau ZIP yang diekspor sebelumnya untuk memulihkan database.",
+    "WARNING: This will replace all current data!": "PERINGATAN: Ini akan menggantikan semua data saat ini!",
+    "Restore Database": "Pulihkan Database",
+    "Processing...": "Memproses...",
+    "Database successfully imported.": "Database berhasil diimpor.",
+    "Import failed: ": "Impor gagal: "
 }

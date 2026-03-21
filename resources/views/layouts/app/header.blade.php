@@ -17,6 +17,7 @@
                 <flux:navbar.item icon="clipboard-document-list" :href="route('activity-log.index')" :current="request()->routeIs('activity-log.index')" wire:navigate>
                     {{ __('Activity Log') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="circle-stack" href="{{ route('database.management') }}" wire:navigate>{{ __('Database') }}</flux:navbar.item>
                 @endcan
             </flux:navbar>
 

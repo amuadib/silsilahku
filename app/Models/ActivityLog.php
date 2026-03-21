@@ -51,6 +51,7 @@ class ActivityLog extends Model
             'created' => 'Tambah',
             'updated' => 'Ubah',
             'deleted' => 'Hapus',
+            'imported_database' => 'Impor Database',
             default   => ucfirst($this->action),
         };
     }
