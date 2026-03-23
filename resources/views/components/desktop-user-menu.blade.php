@@ -19,7 +19,7 @@
         </div>
         <flux:menu.separator />
         <flux:menu.radio.group>
-            <flux:menu.item :href="route('profil')" icon="user" wire:navigate>
+            <flux:menu.item :href="route('pengguna.show', auth()->id())" icon="user" wire:navigate>
                 Profil
             </flux:menu.item>
             <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
