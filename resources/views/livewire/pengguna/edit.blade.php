@@ -28,6 +28,11 @@ new class extends Component {
     public $showFormKematian = false;
     public $formTambahAlamatVisible = false;
     public $accountIsActive=false;
+    public $showFormAkun=false;
+    public $formTambahAlamatMakamVisible = false;
+    public $alamat_makam;
+    public $tanggal_wafat;
+    public $alamat_makam_baru;
 
     // Cascading Dropdown State
     public $selectedProvinsi = '';
@@ -53,6 +58,7 @@ new class extends Component {
         $this->hp = $this->user->hp;
         $this->email = $this->user->email;
         $this->address_id = $this->user->address_id;
+        $this->alamat_makam = $this->user->memorial_address_id;
         $this->wafat = $this->user->wafat;
         if ($this->wafat) {
             $this->showFormKematian = true;
@@ -169,7 +175,18 @@ new class extends Component {
     {
         $validated = $this->validate([
             'tanggal_wafat' => 'nullable|date',
+            'alamat_makam' => 'nullable|string',
+            'alamat_makam_baru' => 'nullable|string',
         ]);
+
+        if ($this->alamat_makam_baru != '') {
+            $address = Address::create([
+                'alamat' => $this->alamat_makam_baru
+            ]);
+            $validated['memorial_address_id'] = $address->id;
+        } elseif ($this->alamat_makam != '') {
+            $validated['memorial_address_id'] = $this->alamat_makam;
+        }
 
         $this->user->update($validated);
 
@@ -342,13 +359,12 @@ new class extends Component {
                         <flux:heading size="xl" level="1" class="p-4">{{ __('Account') }}
                         </flux:heading>
                         @if (!$accountIsActive)
-                            <button wire:click="$set('accountIsActive', true)"
-                                class="float-right m-2 cursor-pointer rounded bg-green-600 px-2 py-1 text-xs text-white hover:bg-green-700">{{ __('Activate') }}</button>
+                            <flux:button size="xs" wire:click="$set('showFormAkun', true)" class="float-right m-2 cursor-pointer" variant="primary" color="green">{{ __('Activate') }}</flux:button>
                         @else
                             <span class="float-right m-2 cursor-pointer rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">{{ __('Account is Active') }}</span>
                         @endif
                     </div>
-                    @if (!$accountIsActive)
+                    @if ($showFormAkun)
                         <table class="w-full text-left">
                             <tr class="border-b">
                                 <th class="w-40 px-4 py-2 text-gray-500">{{ __('Email') }}</th>
@@ -364,23 +380,21 @@ new class extends Component {
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <button wire:click="updateAkun"
-                                        class="float-right m-2 cursor-pointer rounded bg-blue-600 px-4 py-2 text-white">{{ __('Save') }}</button>
-                                    <button wire:click="$set('showFormAkun', false)"
-                                        class="float-right my-2 cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">{{ __('Cancel') }}</button>
+                                    <flux:button wire:click="updateAkun" class="float-right m-2 cursor-pointer" variant="primary" color="blue">{{ __('Save') }}</flux:button>
+                                    <flux:button wire:click="$set('showFormAkun', false)" class="float-right my-2 cursor-pointer" variant="primary" color="red">{{ __('Cancel') }}</flux:button>
                                 </td>
                             </tr>
                         </table>
                     @endif
                 </div>
 @endif
+@if($user->wafat)
                 <div class="w-full border">
                     <div class="flex items-center justify-between border-b">
                         <flux:heading size="lg" level="1" class="p-4">{{ __('Death') }}
                         </flux:heading>
                         @if (!$showFormKematian)
-                            <button wire:click="$set('showFormKematian', true)"
-                                class="float-right m-2 cursor-pointer rounded bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700">{{ __('Add') }}</button>
+                            <flux:button size="xs" wire:click="$set('showFormKematian', true)" class="float-right m-2 cursor-pointer" variant="primary" color="gray">{{ __('Add') }}</flux:button>
                         @endif
                     </div>
                     @if ($showFormKematian)
@@ -392,17 +406,28 @@ new class extends Component {
                                         autocomplete="tanggal_wafat" />
                                 </td>
                             </tr>
-                            <tr class="border-b">
+                            {{-- <tr class="border-b">
                                 <th class="w-40 px-4 text-gray-500">{{ __('Memorial') }}</th>
                                 <td class="px-4 py-2">
                                     <flux:input wire:model="lokasi_makam" type="text"
                                         autocomplete="lokasi_makam" />
                                 </td>
-                            </tr>
+                            </tr> --}}
                             <tr class="border-b">
                                 <th class="w-40 px-4 text-gray-500">{{ __('Memorial Address') }}</th>
                                 <td class="px-4 py-2">
-                                    <textarea wire:model="alamat_makam" rows="3" class="w-full rounded border p-2"></textarea>
+                                    @if($formTambahAlamatMakamVisible)
+                                        <flux:button wire:click="showFormTambahAlamatMakam(false)" class="cursor-pointer mb-2" variant="primary" color="blue" size="sm">{{ __('Cancel') }}</flux:button>
+                                        <textarea wire:model="alamat_makam_baru" rows="3" class="w-full rounded border p-2"></textarea>
+                                    @else
+                                        <flux:button wire:click="showFormTambahAlamatMakam(true)" class="cursor-pointer mb-2" variant="primary" color="blue" size="sm">{{ __('New Address') }}</flux:button>
+                                        <select wire:model.live="alamat_makam" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
+                                            <option value="">{{ __('Select existing Address from other users') }}</option>
+                                            @foreach ($alamat_list as $id => $alamat_item)
+                                                <option value="{{ $id }}">{{ $alamat_item }}</option>
+                                            @endforeach
+                                        </select>
+                                    @endif
                                 </td>
                             </tr>
 
@@ -417,6 +442,7 @@ new class extends Component {
                         </table>
                     @endif
                 </div>
+                @endif
             </div>
         </div>
     </div>

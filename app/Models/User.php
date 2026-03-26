@@ -41,6 +41,7 @@ class User extends Authenticatable
         'ortu_id',
         'foto',
         'address_id',
+        'memorial_address_id',
         'hp',
         'foto',
         'manager_id'
