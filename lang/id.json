@@ -76,6 +76,8 @@
     "Deceased" : "Meninggal",
     "Yes" : "Ya",
     "No" : "Tidak",
+    "Family Relationships" : "Hubungan Keluarga",
+    "Active": "Aktif",
     "Family Tree": "Pohon Keluarga",
     "Back": "Kembali",
     "Full Screen": "Layar Penuh",
@@ -136,5 +138,10 @@
     "Data deleted successfully.": "Data berhasil dihapus.",
     "Or add new Address": "Atau tambahkan alamat baru",
     "New Address": "Alamat Baru",
-    "Select existing Address": "Pilih Alamat yang Sudah Ada"
+    "Select existing Address": "Pilih Alamat yang Sudah Ada",
+    "Profile Detail": "Rincian Profil",
+    "Set": "Atur",
+    "Not set": "Belum diatur",
+    "None": "Tidak ada",
+    "Profile Photo": "Foto Profil"
 }

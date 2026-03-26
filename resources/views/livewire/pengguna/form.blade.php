@@ -12,7 +12,7 @@
             @endif
             @if ($userExist)
                 <div class="mb-2">
-                    <label class="block text-sm font-medium text-gray-700">{{ __('Search Name') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Search Name') }}</label>
                     <flux:select label="" wire:model="userFromSelection">
                         <option value="">{{ __('Select from list') }}</option>
                         @foreach ($userWithoutParentList as $user)
@@ -22,11 +22,11 @@
                 </div>
             @else
                 <div class="mb-2">
-                    <label class="block text-sm font-medium text-gray-700">{{ __('Child Name') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Child Name') }}</label>
                     <flux:input wire:model="name" type="text" placeholder="{{ __('Enter Child Name') }}" />
                 </div>
                 <div class="mb-2">
-                    <label class="block text-sm font-medium text-gray-700">{{ __('Gender') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Gender') }}</label>
                     <label class="inline-flex cursor-pointer items-center gap-2">
                         <input type="radio" wire:model="jenis_kelamin" value="1" class="accent-blue-600">
                         {{ __('Male') }}
@@ -38,7 +38,7 @@
                 </div>
             @endif
             <div class="mb-2">
-                <label class="block text-sm font-medium text-gray-700">{{ __('Couple') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Couple') }}</label>
                 <flux:select label="" wire:model="ortu_id">
                     <option value="">{{ __('Select from Couple list') }}</option>
                     @foreach ($userList as $id => $pasangan)
@@ -47,7 +47,7 @@
                 </flux:select>
             </div>
             <div class="mb-2">
-                <label class="block text-sm font-medium text-gray-700">{{ __('Birth order') }}</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Birth order') }}</label>
                 <flux:input wire:model="anak_ke" type="number" placeholder="{{ __('Enter birth order') }}" />
             </div>
         @elseif ($activeForm === 'orangtua')

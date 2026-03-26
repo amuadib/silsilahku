@@ -34,6 +34,7 @@ class User extends Authenticatable
         'password',
         'jenis_kelamin',
         'tanggal_lahir',
+        'tanggal_wafat',
         'wafat',
         'anak_ke',
         'ayah_id',
@@ -70,6 +71,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'tanggal_lahir' => 'date',
+            'tanggal_wafat' => 'date',
             'wafat' => 'boolean',
         ];
     }

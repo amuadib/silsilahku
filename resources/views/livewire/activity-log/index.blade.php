@@ -117,16 +117,16 @@ new class extends Component {
                     class="min-w-48 flex-1" />
 
                 <flux:select wire:model.live="action" class="w-44">
-                    <flux:select.option value="">{{ __('All Actions') }}</flux:select.option>
-                    <flux:select.option value="created">{{ __('Created') }}</flux:select.option>
-                    <flux:select.option value="updated">{{ __('Updated') }}</flux:select.option>
-                    <flux:select.option value="deleted">{{ __('Deleted') }}</flux:select.option>
+                    <option value="">{{ __('All Actions') }}</option>
+                    <option value="created">{{ __('Created') }}</option>
+                    <option value="updated">{{ __('Updated') }}</option>
+                    <option value="deleted">{{ __('Deleted') }}</option>
                 </flux:select>
 
                 <flux:select wire:model.live="model" class="w-48">
-                    <flux:select.option value="">{{ __('All Models') }}</flux:select.option>
+                    <option value="">{{ __('All Models') }}</option>
                     @foreach ($uniqueModels as $m)
-                        <flux:select.option value="{{ $m }}">{{ $m }}</flux:select.option>
+                        <option value="{{ $m }}">{{ $m }}</option>
                     @endforeach
                 </flux:select>
             </div>

@@ -63,15 +63,15 @@ new class extends Component {
                     icon="magnifying-glass" class="min-w-48 flex-1" />
 
                 <flux:select wire:model.live="jenis_kelamin" class="w-44">
-                    <flux:select.option value="">{{ __('All Gender') }}</flux:select.option>
-                    <flux:select.option value="1">{{ __('Male') }}</flux:select.option>
-                    <flux:select.option value="2">{{ __('Female') }}</flux:select.option>
+                    <option value="">{{ __('All Gender') }}</option>
+                    <option value="1">{{ __('Male') }}</option>
+                    <option value="2">{{ __('Female') }}</option>
                 </flux:select>
 
                 <flux:select wire:model.live="status" class="w-44">
-                    <flux:select.option value="">{{ __('All Status') }}</flux:select.option>
-                    <flux:select.option value="0">{{ __('Alive') }}</flux:select.option>
-                    <flux:select.option value="1">{{ __('Deceased') }}</flux:select.option>
+                    <option value="">{{ __('All Status') }}</option>
+                    <option value="0">{{ __('Alive') }}</option>
+                    <option value="1">{{ __('Deceased') }}</option>
                 </flux:select>
             </div>
 

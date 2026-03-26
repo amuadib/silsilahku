@@ -4,22 +4,25 @@ use Livewire\Volt\Component;
 use App\Models\User;
 use Livewire\WithFileUploads;
 use App\Traits\HasToast;
+use App\Traits\HasAddressCascading;
 use App\Models\Provinsi;
 use App\Models\KabupatenKota;
 use App\Models\Kecamatan;
 use App\Models\DesaKelurahan;
 use App\Models\Address;
+use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
-    use WithFileUploads, HasToast;
+    use WithFileUploads, HasToast, HasAddressCascading;
+
     public $user;
     public $name;
-    public $newFoto; // hanya untuk upload baru
+    public $newFoto;
     public $jenis_kelamin;
     public $tanggal_lahir;
     public $anak_ke;
     public $alamat;
-    public $alamat_list=[];
+    public $alamat_list = [];
     public $address_id;
     public $hp;
     public $email;
@@ -27,23 +30,12 @@ new class extends Component {
     public $wafat;
     public $showFormKematian = false;
     public $formTambahAlamatVisible = false;
-    public $accountIsActive=false;
-    public $showFormAkun=false;
+    public $accountIsActive = false;
+    public $showFormAkun = false;
     public $formTambahAlamatMakamVisible = false;
     public $alamat_makam;
     public $tanggal_wafat;
     public $alamat_makam_baru;
-
-    // Cascading Dropdown State
-    public $selectedProvinsi = '';
-    public $selectedKabupaten = '';
-    public $selectedKecamatan = '';
-    public $selectedDesa = '';
-
-    public $provinsis = [];
-    public $kabupatens = [];
-    public $kecamatans = [];
-    public $desas = [];
 
     public function mount($id)
     {
@@ -51,54 +43,37 @@ new class extends Component {
         $this->name = $this->user->name;
         $this->jenis_kelamin = $this->user->jenis_kelamin;
         $this->tanggal_lahir = $this->user->tanggal_lahir?->format('Y-m-d');
+        $this->tanggal_wafat = $this->user->tanggal_wafat?->format('Y-m-d');
         $this->anak_ke = $this->user->anak_ke;
-        foreach(Address::all() as $address){
-            $this->alamat_list[$address->id] = $address->alamat.' '.$address->nama_desa.' '.$address->nama_kecamatan.' '.$address->nama_kabupaten.' '.$address->nama_provinsi;
-        }
         $this->hp = $this->user->hp;
         $this->email = $this->user->email;
         $this->address_id = $this->user->address_id;
         $this->alamat_makam = $this->user->memorial_address_id;
-        $this->wafat = $this->user->wafat;
-        if ($this->wafat) {
-            $this->showFormKematian = true;
-        }
-        if ($this->user->password != null) {
-            $this->accountIsActive = true;
-        }
+        $this->wafat = $this->user->wafat ? 1 : 0;
+        
+        $this->showFormKematian = (bool) $this->wafat;
+        $this->accountIsActive = !is_null($this->user->password);
 
-        $this->provinsis = Provinsi::orderBy('nama')->get();
+        $this->loadProvinsis();
+        $this->loadAlamatList();
+    }
+
+    protected function loadAlamatList()
+    {
+        $this->alamat_list = Address::all()->mapWithKeys(function ($address) {
+            return [$address->id => $address->full_address];
+        })->toArray();
     }
 
     public function showFormTambahAlamat($value)
     {
         $this->formTambahAlamatVisible = $value;
-        if($value){
-            $this->address_id = null;
-        }
-    }
-    public function updatedSelectedProvinsi($value)
-    {
-        $this->kabupatens = KabupatenKota::where('kode_provinsi', $value)->orderBy('nama')->get();
-        $this->selectedKabupaten = '';
-        $this->selectedKecamatan = '';
-        $this->selectedDesa = '';
-        $this->kecamatans = [];
-        $this->desas = [];
+        if ($value) $this->address_id = null;
     }
 
-    public function updatedSelectedKabupaten($value)
+    public function showFormTambahAlamatMakam($value)
     {
-        $this->kecamatans = Kecamatan::where('kode_kabupaten_kota', $value)->orderBy('nama')->get();
-        $this->selectedKecamatan = '';
-        $this->selectedDesa = '';
-        $this->desas = [];
-    }
-
-    public function updatedSelectedKecamatan($value)
-    {
-        $this->desas = DesaKelurahan::where('kode_kecamatan', $value)->orderBy('nama')->get();
-        $this->selectedDesa = '';
+        $this->formTambahAlamatMakamVisible = $value;
     }
 
     public function update()
@@ -113,27 +88,29 @@ new class extends Component {
             'wafat' => 'nullable|boolean',
         ]);
 
-        $data = [
-            'name' => $validated['name'],
-            'jenis_kelamin' => $validated['jenis_kelamin'],
-            'tanggal_lahir' => $validated['tanggal_lahir'],
-            'anak_ke' => $validated['anak_ke'],
-            'manager_id' => Auth::id(),
-            'hp' => $validated['hp'],
-            'wafat' => $validated['wafat'],
-        ];
-
         if ($this->newFoto) {
-            $data['foto'] = $this->newFoto->store('foto', 'public');
+            $validated['foto'] = $this->newFoto->store('foto', 'public');
         }
 
-        $address_id = $this->address_id ?: null;
+        $validated['address_id'] = $this->resolveAddressId();
+        $validated['manager_id'] = Auth::id();
 
-        if (!$address_id && ($this->selectedDesa || $this->alamat || $this->selectedKecamatan || $this->selectedKabupaten || $this->selectedProvinsi)) {
-            $prov = $this->selectedProvinsi ? Provinsi::where('kode', $this->selectedProvinsi)->first() : null;
-            $kab = $this->selectedKabupaten ? KabupatenKota::where('kode', $this->selectedKabupaten)->first() : null;
-            $kec = $this->selectedKecamatan ? Kecamatan::where('kode', $this->selectedKecamatan)->first() : null;
-            $desa = $this->selectedDesa ? DesaKelurahan::where('kode', $this->selectedDesa)->first() : null;
+        $this->user->update($validated);
+        $this->toastSuccess(__('Data saved successfully.'));
+        $this->redirect(route('pengguna.show', $this->user->id));
+    }
+
+    protected function resolveAddressId()
+    {
+        if ($this->address_id) {
+            return $this->address_id;
+        }
+
+        if ($this->selectedDesa || $this->alamat) {
+            $prov = Provinsi::where('kode', $this->selectedProvinsi)->first();
+            $kab = KabupatenKota::where('kode', $this->selectedKabupaten)->first();
+            $kec = Kecamatan::where('kode', $this->selectedKecamatan)->first();
+            $desa = DesaKelurahan::where('kode', $this->selectedDesa)->first();
 
             $address = Address::create([
                 'alamat' => $this->alamat ?: null,
@@ -145,13 +122,10 @@ new class extends Component {
                 'lat' => $desa?->lat,
                 'lng' => $desa?->lng,
             ]);
-            $address_id = $address->id;
+            return $address->id;
         }
 
-        $data['address_id'] = $address_id;
-        $this->user->update($data);
-        $this->toastSuccess(__('Data saved successfully.'));
-        $this->redirect(route('pengguna.show', $this->user->id));
+        return null;
     }
 
     public function updateAkun()
@@ -161,12 +135,13 @@ new class extends Component {
             'password' => 'nullable|string|min:8',
         ]);
 
-        if ($validated['password']) {
+        if (!empty($validated['password'])) {
             $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
         }
 
         $this->user->update($validated);
-
         $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
@@ -175,21 +150,18 @@ new class extends Component {
     {
         $validated = $this->validate([
             'tanggal_wafat' => 'nullable|date',
-            'alamat_makam' => 'nullable|string',
+            'alamat_makam' => 'nullable',
             'alamat_makam_baru' => 'nullable|string',
         ]);
 
-        if ($this->alamat_makam_baru != '') {
-            $address = Address::create([
-                'alamat' => $this->alamat_makam_baru
-            ]);
+        if (!empty($this->alamat_makam_baru)) {
+            $address = Address::create(['alamat' => $this->alamat_makam_baru]);
             $validated['memorial_address_id'] = $address->id;
-        } elseif ($this->alamat_makam != '') {
+        } else {
             $validated['memorial_address_id'] = $this->alamat_makam;
         }
 
         $this->user->update($validated);
-
         $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
     }
@@ -203,246 +175,174 @@ new class extends Component {
     }
 };
 ?>
-<section class="item-center mx-auto flex w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
+<section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
     <div class="w-full">
-        <div class="relative my-6 flex w-full justify-between">
+        <div class="relative my-6 flex w-full justify-between items-center">
             <div>
                 <flux:heading size="xl" level="1">{{ $user->name }}</flux:heading>
                 <flux:subheading size="lg">{{ __('Edit') }}</flux:subheading>
             </div>
-            <div>
-                <flux:button color="sky" class="cursor-pointer" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">{{ __('Detail') }}
-                </flux:button>
-            </div>
+            <flux:button color="sky" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">
+                {{ __('Detail') }}
+            </flux:button>
         </div>
+
         <flux:separator variant="subtle" />
-        <flux:heading class="sr-only">{{ __('Edit') }}</flux:heading>
-        <div class="mt-4 flex items-start gap-5 max-md:flex-col">
-            <div class="flex-1 self-stretch border max-md:pt-6">
-                <flux:heading size="xl" level="1" class="border-b p-4">{{ __('Profile') }}
-                </flux:heading>
 
-                <table class="w-full text-left">
-                    <tr class="border-b">
-                        <td colspan="2" class="px-4 py-2">
-                            @if ($newFoto)
-                                {{-- Preview foto baru yang baru saja diupload --}}
-                                <img src="{{ $newFoto->temporaryUrl() }}" alt="Foto {{ $user->name }}"
-                                    class="mx-auto mb-2 w-64 object-cover">
-                            @elseif ($user->foto)
-                                {{-- Tampilkan foto lama dari storage --}}
+        <div class="mt-4 flex flex-col md:flex-row gap-8">
+            {{-- Profile Section --}}
+            <div class="flex-1 space-y-6">
+                <div class="border dark:border-zinc-700 rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-sm">
+                    <flux:heading size="xl" class="border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">{{ __('Profile') }}</flux:heading>
+                    
+                    <div class="p-6 space-y-4">
+                        <x-profile-photo :user="$user" :newFoto="$newFoto" />
 
-                                <img src="{{ asset('storage/' . $user->foto) }}" alt="Foto {{ $user->name }}"
-                                    class="mx-auto mb-2 w-64 object-cover">
-                            @else
-                                {{-- Foto default berdasarkan jenis kelamin --}}
-                                <img src="{{ $user->jenis_kelamin == '1' ? asset('img/avatar-m.jpg') : asset('img/avatar-f.jpg') }}"
-                                    alt="Foto {{ $user->name }}" class="mx-auto mb-2 w-64 object-cover">
-                            @endif
-                            <flux:input wire:model="newFoto" type="file" accept="image/*" />
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="w-40 px-4 py-2 text-gray-500">{{ __('Name') }}</th>
-                        <td class="px-4 py-2">
-                            <flux:input wire:model="name" type="text" required autofocus autocomplete="name" />
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="px-4 py-2 text-gray-500">{{ __('Gender') }}</th>
-                        <td class="px-4 py-2">
-                            <div class="flex gap-4">
-                                <label class="inline-flex cursor-pointer items-center gap-2">
-                                    <input type="radio" wire:model="jenis_kelamin" value="1"
-                                        class="accent-blue-600"> {{ __('Male') }}
-                                </label>
-                                <label class="inline-flex cursor-pointer items-center gap-2">
-                                    <input type="radio" wire:model="jenis_kelamin" value="2"
-                                        class="accent-pink-500"> {{ __('Female') }}
-                                </label>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="px-4 py-2 text-gray-500">{{ __('Birthday') }}</th>
-                        <td class="px-4 py-2">
-                            {{-- tanggal lahir tidak terisi --}}
-                            <flux:input wire:model="tanggal_lahir" type="date" autocomplete="tanggal_lahir" />
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="px-4 py-2 text-gray-500">{{ __('Birth order') }}</th>
-                        <td class="px-4 py-2">
-                            <flux:input wire:model="anak_ke" type="number" />
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="w-40 px-4 py-2 text-gray-500">{{ __('Address') }}</th>
-                        <td class="px-4 py-2 space-y-2">
-                            @if($formTambahAlamatVisible)
-                                <flux:button wire:click="showFormTambahAlamat(false)" class="cursor-pointer" variant="primary" color="gray" size="sm">{{ __('Select existing Address') }}</flux:button>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                                    <select wire:model.live="selectedProvinsi" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
-                                        <option value="">-- {{ __('Provinsi') }} --</option>
-                                        @foreach ($provinsis as $p)
-                                            <option value="{{ $p->kode }}">{{ $p->nama }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <select wire:model.live="selectedKabupaten" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($kabupatens) ? 'disabled' : '' }}>
-                                        <option value="">-- {{ __('Kabupaten/Kota') }} --</option>
-                                        @foreach ($kabupatens as $k)
-                                            <option value="{{ $k->kode }}">{{ $k->nama }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <select wire:model.live="selectedKecamatan" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($kecamatans) ? 'disabled' : '' }}>
-                                        <option value="">-- {{ __('Kecamatan') }} --</option>
-                                        @foreach ($kecamatans as $k)
-                                            <option value="{{ $k->kode }}">{{ $k->nama }}</option>
-                                        @endforeach
-                                    </select>
-
-                                    <select wire:model.live="selectedDesa" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($desas) ? 'disabled' : '' }}>
-                                        <option value="">-- {{ __('Desa/Kelurahan') }} --</option>
-                                        @foreach ($desas as $d)
-                                            <option value="{{ $d->kode }}">{{ $d->nama }}</option>
-                                        @endforeach
-                                    </select>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <flux:input wire:model="name" :label="__('Name')" required autofocus />
+                            
+                            <flux:field>
+                                <flux:label>{{ __('Gender') }}</flux:label>
+                                <div class="flex gap-4 mt-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model="jenis_kelamin" value="1" class="accent-blue-600"> {{ __('Male') }}
+                                    </label>
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model="jenis_kelamin" value="2" class="accent-pink-500"> {{ __('Female') }}
+                                    </label>
                                 </div>
-                                <textarea wire:model="alamat" rows="3" class="w-full rounded border p-2 text-sm" placeholder="{{ __('Full Address Detail') }}"></textarea>
-                            @else
-                                <flux:button wire:click="showFormTambahAlamat(true)" class="cursor-pointer" variant="primary" color="blue" size="sm">{{ __('New Address') }}</flux:button>
-                                <select wire:model.live="address_id" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
-                                    <option value="">{{ __('Select existing Address from other users') }}</option>
-                                    @foreach ($alamat_list as $id => $alamat_item)
-                                        <option value="{{ $id }}">{{ $alamat_item }}</option>
-                                    @endforeach
-                                </select>
-                            @endif
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="px-4 py-2 text-gray-500">{{ __('Phone') }}</th>
-                        <td class="px-4 py-2">
-                            <flux:input wire:model="hp" type="text" autocomplete="hp" />
-                        </td>
-                    </tr>
-                    <tr class="border-b">
-                        <th class="px-4 py-2 text-gray-500">{{ __('Deceased') }}</th>
-                        <td class="px-4 py-2">
-                            <div class="flex gap-4">
-                                <label class="inline-flex cursor-pointer items-center gap-2">
-                                    <input type="radio" wire:model="wafat" value="1" class="accent-blue-600">
-                                    {{ __('Yes') }}
-                                </label>
-                                <label class="inline-flex cursor-pointer items-center gap-2">
-                                    <input type="radio" wire:model="wafat" value="0" class="accent-gray-500">
-                                    {{ __('No') }}
-                                </label>
+                            </flux:field>
+
+                            <flux:input wire:model="tanggal_lahir" type="date" :label="__('Birthday')" />
+                            <flux:input wire:model="anak_ke" type="number" :label="__('Birth order')" />
+                            <flux:input wire:model="hp" :label="__('Phone')" />
+                            
+                            <flux:field>
+                                <flux:label>{{ __('Deceased') }}</flux:label>
+                                <div class="flex gap-4 mt-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model="wafat" value="1" class="accent-blue-600"> {{ __('Yes') }}
+                                    </label>
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" wire:model="wafat" value="0" class="accent-gray-500"> {{ __('No') }}
+                                    </label>
+                                </div>
+                            </flux:field>
+                        </div>
+
+                        <flux:field>
+                            <flux:label>{{ __('Address') }}</flux:label>
+                            <div class="mt-2 space-y-2">
+                                @if($formTambahAlamatVisible)
+                                    <flux:button wire:click="showFormTambahAlamat(false)" size="sm" variant="subtle">{{ __('Select existing') }}</flux:button>
+                                    <x-address-picker :provinsis="$provinsis" :kabupatens="$kabupatens" :kecamatans="$kecamatans" :desas="$desas" />
+                                    <flux:textarea wire:model="alamat" rows="2" :placeholder="__('Full Address Detail')" />
+                                @else
+                                    <div class="flex gap-2 items-center">
+                                        <div class="flex-1 w-full">
+                                            <flux:select wire:model.live="address_id" :placeholder="__('Select existing Address')">
+                                                <option value="">{{ __('Select existing Address') }}</option>
+                                                @foreach ($alamat_list as $id => $label)
+                                                    <option value="{{ $id }}">{{ $label }}</option>
+                                                @endforeach
+                                            </flux:select>
+                                        </div>
+                                        <flux:button wire:click="showFormTambahAlamat(true)" icon="plus" variant="subtle" />
+                                    </div>
+                                @endif
                             </div>
-                            @error('wafat')
-                                <span class="text-red-500">{{ $message }}</span>
-                            @enderror
-                        </td>
-                    </tr>
-                </table>
-                <flux:button wire:click="update"
-                    class="cursor-pointer float-right m-2" color="yellow" variant="primary">{{ __('Update') }}</flux:button>
-            </div>
-            <flux:separator class="md:hidden" />
-
-            <div class="flex-1 self-stretch max-md:pt-6">
-                @if(!$user->wafat)
-                <div class="w-full border mb-4">
-                    <div class="flex items-center justify-between border-b">
-                        <flux:heading size="xl" level="1" class="p-4">{{ __('Account') }}
-                        </flux:heading>
-                        @if (!$accountIsActive)
-                            <flux:button size="xs" wire:click="$set('showFormAkun', true)" class="float-right m-2 cursor-pointer" variant="primary" color="green">{{ __('Activate') }}</flux:button>
-                        @else
-                            <span class="float-right m-2 cursor-pointer rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700">{{ __('Account is Active') }}</span>
-                        @endif
+                        </flux:field>
                     </div>
-                    @if ($showFormAkun)
-                        <table class="w-full text-left">
-                            <tr class="border-b">
-                                <th class="w-40 px-4 py-2 text-gray-500">{{ __('Email') }}</th>
-                                <td class="px-4 py-2">
-                                    <flux:input wire:model="email" type="email" autocomplete="email" />
-                                </td>
-                            </tr>
-                            <tr class="border-b">
-                                <th class="px-4 py-2 text-gray-500">{{ __('Password') }}</th>
-                                <td class="px-4 py-2">
-                                    <flux:input wire:model="password" type="password" autocomplete="password" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <flux:button wire:click="updateAkun" class="float-right m-2 cursor-pointer" variant="primary" color="blue">{{ __('Save') }}</flux:button>
-                                    <flux:button wire:click="$set('showFormAkun', false)" class="float-right my-2 cursor-pointer" variant="primary" color="red">{{ __('Cancel') }}</flux:button>
-                                </td>
-                            </tr>
-                        </table>
-                    @endif
+
+                    <div class="p-4 bg-gray-50 dark:bg-zinc-800/50 border-t dark:border-zinc-700 flex justify-end">
+                        <flux:button wire:click="update" color="yellow" variant="primary">{{ __('Save') }}</flux:button>
+                    </div>
                 </div>
-@endif
-@if($user->wafat)
-                <div class="w-full border">
-                    <div class="flex items-center justify-between border-b">
-                        <flux:heading size="lg" level="1" class="p-4">{{ __('Death') }}
-                        </flux:heading>
-                        @if (!$showFormKematian)
-                            <flux:button size="xs" wire:click="$set('showFormKematian', true)" class="float-right m-2 cursor-pointer" variant="primary" color="gray">{{ __('Add') }}</flux:button>
+            </div>
+
+            {{-- Sidebar Sections --}}
+            <div class="w-full md:w-1/3 space-y-6">
+                {{-- Account Section --}}
+                @if(!$user->wafat)
+                <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
+                        <flux:heading size="lg">{{ __('Account') }}</flux:heading>
+                        @if (!$accountIsActive)
+                            <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green">{{ __('Activate') }}</flux:button>
+                        @else
+                            <flux:badge color="sky" size="sm">{{ __('Active') }}</flux:badge>
                         @endif
                     </div>
-                    @if ($showFormKematian)
-                        <table class="w-full text-left">
-                            <tr class="border-b">
-                                <th class="w-40 px-4 text-gray-500">{{ __('Deathday') }}</th>
-                                <td class="px-4 py-2">
-                                    <flux:input wire:model="tanggal_wafat" type="date"
-                                        autocomplete="tanggal_wafat" />
-                                </td>
-                            </tr>
-                            {{-- <tr class="border-b">
-                                <th class="w-40 px-4 text-gray-500">{{ __('Memorial') }}</th>
-                                <td class="px-4 py-2">
-                                    <flux:input wire:model="lokasi_makam" type="text"
-                                        autocomplete="lokasi_makam" />
-                                </td>
-                            </tr> --}}
-                            <tr class="border-b">
-                                <th class="w-40 px-4 text-gray-500">{{ __('Memorial Address') }}</th>
-                                <td class="px-4 py-2">
-                                    @if($formTambahAlamatMakamVisible)
-                                        <flux:button wire:click="showFormTambahAlamatMakam(false)" class="cursor-pointer mb-2" variant="primary" color="blue" size="sm">{{ __('Cancel') }}</flux:button>
-                                        <textarea wire:model="alamat_makam_baru" rows="3" class="w-full rounded border p-2"></textarea>
-                                    @else
-                                        <flux:button wire:click="showFormTambahAlamatMakam(true)" class="cursor-pointer mb-2" variant="primary" color="blue" size="sm">{{ __('New Address') }}</flux:button>
-                                        <select wire:model.live="alamat_makam" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
-                                            <option value="">{{ __('Select existing Address from other users') }}</option>
-                                            @foreach ($alamat_list as $id => $alamat_item)
-                                                <option value="{{ $id }}">{{ $alamat_item }}</option>
-                                            @endforeach
-                                        </select>
-                                    @endif
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td colspan="2">
-                                    <button wire:click="updateKematian"
-                                        class="float-right m-2 cursor-pointer rounded bg-gray-600 px-4 py-2 text-white hover:bg-gray-700">{{ __('Save') }}</button>
-                                    <button wire:click="$set('showFormKematian', false)"
-                                        class="float-right my-2 cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700">{{ __('Cancel') }}</button>
-                                </td>
-                            </tr>
-                        </table>
+                    
+                    @if ($showFormAkun)
+                    <div class="p-4 space-y-4">
+                        <flux:input wire:model="email" type="email" :label="__('Email')" />
+                        <flux:input wire:model="password" type="password" :label="__('Password')" />
+                        <div class="flex justify-end gap-2">
+                            <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            <flux:button wire:click="updateAkun" size="sm" color="blue">{{ __('Save') }}</flux:button>
+                        </div>
+                    </div>
                     @endif
                 </div>
                 @endif
+
+                {{-- Death Section --}}
+                @if($user->wafat)
+                <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+                    <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
+                        <flux:heading size="lg">{{ __('Death') }}</flux:heading>
+                        @if (!$showFormKematian)
+                            <flux:button size="xs" wire:click="$set('showFormKematian', true)" variant="subtle">{{ __('Edit') }}</flux:button>
+                        @endif
+                    </div>
+
+                    @if ($showFormKematian)
+                    <div class="p-4 space-y-4">
+                        <flux:input wire:model="tanggal_wafat" type="date" :label="__('Deathday')" />
+                        
+                        <flux:field>
+                            <flux:label>{{ __('Memorial Address') }}</flux:label>
+                            <div class="mt-2 space-y-2">
+                                @if($formTambahAlamatMakamVisible)
+                                    <flux:button wire:click="showFormTambahAlamatMakam(false)" size="sm" variant="subtle">{{ __('Cancel') }}</flux:button>
+                                    <flux:textarea wire:model="alamat_makam_baru" rows="2" />
+                                @else
+                                    <div class="flex gap-2 items-center">
+                                        <div class="flex-1 w-full">
+                                            <flux:select wire:model.live="alamat_makam" :placeholder="__('Select existing Address')">
+                                                <option value="">{{ __('Select existing') }}</option>
+                                                @foreach ($alamat_list as $id => $label)
+                                                    <option value="{{ $id }}">{{ $label }}</option>
+                                                @endforeach
+                                            </flux:select>
+                                        </div>
+                                        <flux:button wire:click="showFormTambahAlamatMakam(true)" icon="plus" variant="subtle" />
+                                    </div>
+                                @endif
+                            </div>
+                        </flux:field>
+
+                        <div class="flex justify-end gap-2">
+                            <flux:button wire:click="$set('showFormKematian', false)" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            <flux:button wire:click="updateKematian" size="sm" color="zinc">{{ __('Save') }}</flux:button>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                @endif
+
+                {{-- Delete Action --}}
+                @can('delete', $user)
+                <div class="p-4 border border-red-200 dark:border-red-900/50 rounded-lg bg-red-50 dark:bg-red-900/20">
+                    <flux:heading size="sm" class="text-red-700 dark:text-red-400 mb-2">{{ __('Danger Zone') }}</flux:heading>
+                    <flux:button color="red" class="w-full" variant="ghost"
+                        wire:click="delete('{{ $user->id }}')"
+                        wire:confirm="{{ __('Are you sure?') }}">
+                        {{ __('Delete User') }}
+                    </flux:button>
+                </div>
+                @endcan
             </div>
         </div>
     </div>
