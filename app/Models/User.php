@@ -40,7 +40,7 @@ class User extends Authenticatable
         'ibu_id',
         'ortu_id',
         'foto',
-        'alamat',
+        'address_id',
         'hp',
         'foto',
         'manager_id'
@@ -145,6 +145,10 @@ class User extends Authenticatable
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id', 'id');
+    }
+    public function alamat()
+    {
+        return $this->belongsTo(Address::class,'address_id', 'id');
     }
     public function isAdmin()
     {

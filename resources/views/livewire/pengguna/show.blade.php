@@ -226,7 +226,13 @@ new class extends Component {
                         </tr>
                         <tr class="border-b">
                             <th class="px-4 py-2 text-gray-500">{{ __('Address') }}</th>
-                            <td class="py-2">{{ $user->alamat ?? '' }}</td>
+                            <td class="py-2">
+                                {{ $user->alamat->alamat ?? '' }}
+                                {{ $user->alamat->nama_desa ?? '' }}
+                                {{ $user->alamat->nama_kecamatan ?? '' }}
+                                {{ $user->alamat->nama_kabupaten ?? '' }}
+                                {{ $user->alamat->nama_provinsi ?? '' }}
+                            </td>
                         </tr>
 
                         @if ($user->wafat)

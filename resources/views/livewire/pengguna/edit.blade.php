@@ -4,6 +4,11 @@ use Livewire\Volt\Component;
 use App\Models\User;
 use Livewire\WithFileUploads;
 use App\Traits\HasToast;
+use App\Models\Provinsi;
+use App\Models\KabupatenKota;
+use App\Models\Kecamatan;
+use App\Models\DesaKelurahan;
+use App\Models\Address;
 
 new class extends Component {
     use WithFileUploads, HasToast;
@@ -15,13 +20,25 @@ new class extends Component {
     public $anak_ke;
     public $alamat;
     public $alamat_list;
-    public $alamat_list_selected;
+    public $address_id;
     public $hp;
     public $email;
     public $password;
     public $wafat;
     public $showFormKematian = false;
+    public $formTambahAlamatVisible = false;
     public $accountIsActive=false;
+
+    // Cascading Dropdown State
+    public $selectedProvinsi = '';
+    public $selectedKabupaten = '';
+    public $selectedKecamatan = '';
+    public $selectedDesa = '';
+
+    public $provinsis = [];
+    public $kabupatens = [];
+    public $kecamatans = [];
+    public $desas = [];
 
     public function mount($id)
     {
@@ -30,10 +47,12 @@ new class extends Component {
         $this->jenis_kelamin = $this->user->jenis_kelamin;
         $this->tanggal_lahir = $this->user->tanggal_lahir?->format('Y-m-d');
         $this->anak_ke = $this->user->anak_ke;
-        $this->alamat = $this->user->alamat;
-        $this->alamat_list = User::where('alamat', '!=', '')->orderBy('alamat', 'asc')->pluck('alamat')->unique();
+        foreach(Address::all() as $address){
+            $this->alamat_list[$address->id] = $address->alamat.' '.$address->nama_desa.' '.$address->nama_kecamatan.' '.$address->nama_kabupaten.' '.$address->nama_provinsi;
+        }
         $this->hp = $this->user->hp;
         $this->email = $this->user->email;
+        $this->address_id = $this->user->address_id;
         $this->wafat = $this->user->wafat;
         if ($this->wafat) {
             $this->showFormKematian = true;
@@ -41,6 +60,39 @@ new class extends Component {
         if ($this->user->password != null) {
             $this->accountIsActive = true;
         }
+
+        $this->provinsis = Provinsi::orderBy('nama')->get();
+    }
+
+    public function showFormTambahAlamat($value)
+    {
+        $this->formTambahAlamatVisible = $value;
+        if($value){
+            $this->address_id = null;
+        }
+    }
+    public function updatedSelectedProvinsi($value)
+    {
+        $this->kabupatens = KabupatenKota::where('kode_provinsi', $value)->orderBy('nama')->get();
+        $this->selectedKabupaten = '';
+        $this->selectedKecamatan = '';
+        $this->selectedDesa = '';
+        $this->kecamatans = [];
+        $this->desas = [];
+    }
+
+    public function updatedSelectedKabupaten($value)
+    {
+        $this->kecamatans = Kecamatan::where('kode_kabupaten_kota', $value)->orderBy('nama')->get();
+        $this->selectedKecamatan = '';
+        $this->selectedDesa = '';
+        $this->desas = [];
+    }
+
+    public function updatedSelectedKecamatan($value)
+    {
+        $this->desas = DesaKelurahan::where('kode_kecamatan', $value)->orderBy('nama')->get();
+        $this->selectedDesa = '';
     }
 
     public function update()
@@ -51,8 +103,6 @@ new class extends Component {
             'jenis_kelamin' => 'required|in:1,2',
             'tanggal_lahir' => 'nullable|date',
             'anak_ke' => 'nullable|numeric',
-            'alamat' => 'nullable|string|max:255',
-            'alamat_list_selected' => 'nullable|string|max:255',
             'hp' => 'nullable|string|max:255',
             'wafat' => 'nullable|boolean',
         ]);
@@ -63,7 +113,6 @@ new class extends Component {
             'tanggal_lahir' => $validated['tanggal_lahir'],
             'anak_ke' => $validated['anak_ke'],
             'manager_id' => Auth::id(),
-            'alamat' => $validated['alamat_list_selected'] ?? $validated['alamat'],
             'hp' => $validated['hp'],
             'wafat' => $validated['wafat'],
         ];
@@ -72,6 +121,28 @@ new class extends Component {
             $data['foto'] = $this->newFoto->store('foto', 'public');
         }
 
+        $address_id = $this->address_id ?: null;
+
+        if (!$address_id && ($this->selectedDesa || $this->alamat || $this->selectedKecamatan || $this->selectedKabupaten || $this->selectedProvinsi)) {
+            $prov = $this->selectedProvinsi ? Provinsi::where('kode', $this->selectedProvinsi)->first() : null;
+            $kab = $this->selectedKabupaten ? KabupatenKota::where('kode', $this->selectedKabupaten)->first() : null;
+            $kec = $this->selectedKecamatan ? Kecamatan::where('kode', $this->selectedKecamatan)->first() : null;
+            $desa = $this->selectedDesa ? DesaKelurahan::where('kode', $this->selectedDesa)->first() : null;
+
+            $address = Address::create([
+                'alamat' => $this->alamat ?: null,
+                'kode_desa' => $desa?->kode,
+                'nama_desa' => $desa?->nama,
+                'nama_kecamatan' => $kec?->nama,
+                'nama_kabupaten' => $kab?->nama,
+                'nama_provinsi' => $prov?->nama,
+                'lat' => $desa?->lat,
+                'lng' => $desa?->lng,
+            ]);
+            $address_id = $address->id;
+        }
+
+        $data['address_id'] = $address_id;
         $this->user->update($data);
         $this->toastSuccess(__('Data saved successfully.'));
         $this->redirect(route('pengguna.show', $this->user->id));
@@ -192,14 +263,48 @@ new class extends Component {
                     </tr>
                     <tr class="border-b">
                         <th class="w-40 px-4 py-2 text-gray-500">{{ __('Address') }}</th>
-                        <td class="px-4 py-2">
-                            <select wire:model="alamat_list_selected" class="w-full rounded border p-2">
-                                <option value="">{{ __('Select existing Address') }}</option>
-                                @foreach ($alamat_list as $alamat)
-                                    <option value="{{ $alamat }}">{{ $alamat }}</option>
-                                @endforeach
-                            </select>
-                            <textarea wire:model="alamat" rows="3" class="w-full rounded border p-2"></textarea>
+                        <td class="px-4 py-2 space-y-2">
+                            @if($formTambahAlamatVisible)
+                                <flux:button wire:click="showFormTambahAlamat(false)" class="cursor-pointer" variant="primary" color="gray" size="sm">{{ __('Select existing Address') }}</flux:button>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                    <select wire:model.live="selectedProvinsi" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
+                                        <option value="">-- {{ __('Provinsi') }} --</option>
+                                        @foreach ($provinsis as $p)
+                                            <option value="{{ $p->kode }}">{{ $p->nama }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <select wire:model.live="selectedKabupaten" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($kabupatens) ? 'disabled' : '' }}>
+                                        <option value="">-- {{ __('Kabupaten/Kota') }} --</option>
+                                        @foreach ($kabupatens as $k)
+                                            <option value="{{ $k->kode }}">{{ $k->nama }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <select wire:model.live="selectedKecamatan" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($kecamatans) ? 'disabled' : '' }}>
+                                        <option value="">-- {{ __('Kecamatan') }} --</option>
+                                        @foreach ($kecamatans as $k)
+                                            <option value="{{ $k->kode }}">{{ $k->nama }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <select wire:model.live="selectedDesa" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors" {{ empty($desas) ? 'disabled' : '' }}>
+                                        <option value="">-- {{ __('Desa/Kelurahan') }} --</option>
+                                        @foreach ($desas as $d)
+                                            <option value="{{ $d->kode }}">{{ $d->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <textarea wire:model="alamat" rows="3" class="w-full rounded border p-2 text-sm" placeholder="{{ __('Full Address Detail') }}"></textarea>
+                            @else
+                                <flux:button wire:click="showFormTambahAlamat(true)" class="cursor-pointer" variant="primary" color="blue" size="sm">{{ __('New Address') }}</flux:button>
+                                <select wire:model.live="address_id" class="w-full rounded border p-2 text-sm bg-gray-50 focus:bg-white transition-colors">
+                                    <option value="">{{ __('Select existing Address from other users') }}</option>
+                                    @foreach ($alamat_list as $id => $alamat_item)
+                                        <option value="{{ $id }}">{{ $alamat_item }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </td>
                     </tr>
                     <tr class="border-b">
@@ -227,8 +332,8 @@ new class extends Component {
                         </td>
                     </tr>
                 </table>
-                <button wire:click="update"
-                    class="float-right m-2 cursor-pointer rounded bg-yellow-600 px-4 py-2 text-white">{{ __('Update') }}</button>
+                <flux:button wire:click="update"
+                    class="cursor-pointer float-right m-2" color="yellow" variant="primary">{{ __('Update') }}</flux:button>
             </div>
             <flux:separator class="md:hidden" />
 

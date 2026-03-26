@@ -126,7 +126,15 @@ new class extends Component {
                                     </flux:badge>
                                 </td>
                                 <td class="px-4 py-2 text-zinc-500 dark:text-zinc-400">
-                                    {{ $u->alamat ?? '-' }}
+                                    @if($u->alamat)
+                                         {{ $u->alamat->alamat ?? '' }}
+                                {{ $u->alamat->nama_desa ?? '' }}
+                                {{ $u->alamat->nama_kecamatan ?? '' }}
+                                {{ $u->alamat->nama_kabupaten ?? '' }}
+                                {{ $u->alamat->nama_provinsi ?? '' }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td class="px-4 py-2">
                                     {{ $u->hp ?? '-' }}
