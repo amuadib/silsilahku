@@ -19,7 +19,7 @@ new class extends Component {
     public $tanggal_lahir;
     public $anak_ke;
     public $alamat;
-    public $alamat_list;
+    public $alamat_list=[];
     public $address_id;
     public $hp;
     public $email;
