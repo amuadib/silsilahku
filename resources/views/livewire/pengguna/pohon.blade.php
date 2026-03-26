@@ -196,11 +196,9 @@ new class extends Component {
                 </svg>
                 {{ __('Full Screen') }}
             </flux:button>
-            <a href="{{ route('pengguna.show', $user->id) }}">
-                <flux:button color="blue" class="cursor-pointer" variant="primary">
-                    {{ __('Detail') }}
-                </flux:button>
-            </a>
+            <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate class="cursor-pointer" variant="primary">
+                {{ __('Detail') }}
+            </flux:button>
         </div>
     </div>
 

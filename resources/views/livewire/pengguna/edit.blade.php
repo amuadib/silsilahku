@@ -194,10 +194,8 @@ new class extends Component {
                 <flux:subheading size="lg">{{ __('Edit') }}</flux:subheading>
             </div>
             <div>
-                <a href="{{ route('pengguna.show', $user->id) }}">
-                    <flux:button color="sky" class="cursor-pointer" variant="primary">{{ __('Detail') }}
-                    </flux:button>
-                </a>
+                <flux:button color="sky" class="cursor-pointer" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">{{ __('Detail') }}
+                </flux:button>
             </div>
         </div>
         <flux:separator variant="subtle" />

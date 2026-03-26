@@ -149,15 +149,11 @@ new class extends Component {
                 <flux:subheading size="lg">{{ __('Profile') }}</flux:subheading>
             </div>
             <div>
-                <a href="{{ route('pengguna.pohon', $user->id) }}">
-                    <flux:button color="zinc" class="cursor-pointer" variant="outline">{{ __('Family Tree') }}
-                    </flux:button>
-                </a>
+                <flux:button color="zinc" href="{{ route('pengguna.pohon', $user->id) }}" wire:navigate class="cursor-pointer" variant="outline">{{ __('Family Tree') }}
+                </flux:button>
                 @can('update', $user)
-                    <a href="{{ route('pengguna.edit', $user->id) }}">
-                        <flux:button color="yellow" class="cursor-pointer" variant="primary">{{ __('Edit') }}
-                        </flux:button>
-                    </a>
+                    <flux:button color="yellow" href="{{ route('pengguna.edit', $user->id) }}" wire:navigate class="cursor-pointer" variant="primary">{{ __('Edit') }}
+                    </flux:button>
                 @endcan
             </div>
         </div>
