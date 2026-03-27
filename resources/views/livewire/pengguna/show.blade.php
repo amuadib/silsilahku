@@ -157,7 +157,7 @@ new class extends Component {
                 <div class="border rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-sm">
                     <div class="bg-gray-50 dark:bg-zinc-800/50 p-6 flex flex-col items-center border-b dark:border-zinc-700">
                         <x-profile-photo :user="$user" :showUpload="false" />
-                        <flux:heading size="lg" class="mt-4">{{ $user->name }}</flux:heading>
+                        <flux:heading size="lg" class="mt-4">{{ $user->name }} {{ $user->wafat ? '(Alm)' : '' }}</flux:heading>
                         <flux:badge color="{{ $user->jenis_kelamin == '1' ? 'blue' : 'pink' }}" size="sm" class="mt-1">
                             {{ $user->jenis_kelamin == '1' ? __('Male') : __('Female') }}
                         </flux:badge>
@@ -178,7 +178,7 @@ new class extends Component {
                             <span class="text-gray-500 dark:text-zinc-400">{{ __('Age') }}</span>
                             <span>
                                 @if ($user->wafat)
-                                    {{ $user->tanggal_lahir?->diffForHumans($user->tanggal_wafat, null, true, true) ?: '-' }}
+                                    {{ $user->tanggal_lahir?->diffForHumans($user->tanggal_wafat, true, true) ?: '-' }}
                                 @else
                                     {{ $user->tanggal_lahir?->diffForHumans(null, true, true) ?: '-' }}
                                 @endif
@@ -272,11 +272,11 @@ new class extends Component {
                                 @if ($user->orangTua)
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('pengguna.show', $user->orangTua->suami->id) }}" class="text-blue-600 hover:underline">
-                                            {{ $user->orangTua->suami->name }}
+                                            {{ $user->orangTua->suami->name }} {{ $user->orangTua->suami->wafat ? '(Alm)' : '' }}
                                         </a>
                                         <span class="text-gray-400 dark:text-zinc-500">&</span>
                                         <a href="{{ route('pengguna.show', $user->orangTua->istri->id) }}" class="text-blue-600 hover:underline">
-                                            {{ $user->orangTua->istri->name }}
+                                            {{ $user->orangTua->istri->name }} {{ $user->orangTua->istri->wafat ? '(Alm)' : '' }}
                                         </a>
                                     </div>
                                 @endif
