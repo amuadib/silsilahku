@@ -106,7 +106,7 @@ new class extends Component {
             return $this->address_id;
         }
 
-        if ($this->selectedDesa || $this->alamat) {
+        if ($this->selectedDesa || $this->selectedKecamatan || $this->selectedKabupaten || $this->selectedProvinsi || $this->alamat) {
             $prov = Provinsi::where('kode', $this->selectedProvinsi)->first();
             $kab = KabupatenKota::where('kode', $this->selectedKabupaten)->first();
             $kec = Kecamatan::where('kode', $this->selectedKecamatan)->first();
