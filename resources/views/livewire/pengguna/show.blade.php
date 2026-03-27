@@ -204,7 +204,7 @@ new class extends Component {
 
                     @can('delete', $user)
                     <div class="p-4 bg-red-50 dark:bg-red-900/20 border-t dark:border-zinc-700">
-                        <flux:button color="red" variant="ghost" class="w-full"
+                        <flux:button color="red" variant="ghost" class="w-full cursor-pointer"
                             wire:click="delete('{{ $user->id }}')"
                             wire:confirm="{{ __('Are you sure?') }}">
                             {{ __('Delete') }}
