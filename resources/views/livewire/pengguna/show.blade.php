@@ -138,7 +138,7 @@ new class extends Component {
                 <flux:subheading size="lg">{{ __('Profile Detail') }}</flux:subheading>
             </div>
             <div class="flex gap-2">
-                <flux:button color="zinc" href="{{ route('pengguna.pohon', $user->id) }}" wire:navigate variant="outline">
+                <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate variant="outline">
                     {{ __('Family Tree') }}
                 </flux:button>
                 @can('update', $user)
