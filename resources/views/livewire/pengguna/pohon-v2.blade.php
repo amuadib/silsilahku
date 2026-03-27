@@ -150,7 +150,7 @@ new class extends Component {
     <div class="relative my-6 flex w-full items-center justify-between border-b pb-4">
         <div>
             <flux:heading size="xl" level="1">
-                {{ __('Family Tree') }} Bani {{ $user->name }} (V2)
+                {{ __('Family Tree') }} Bani {{ $user->name }}
             </flux:heading>
             <flux:subheading size="lg" class="mt-1">
                 {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
