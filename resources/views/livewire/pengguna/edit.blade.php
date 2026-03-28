@@ -52,7 +52,9 @@ new class extends Component {
         $this->wafat = $this->user->wafat ? 1 : 0;
         
         $this->showFormKematian = (bool) $this->wafat;
+
         $this->accountIsActive = !is_null($this->user->password);
+        $this->showFormAkun = $this->accountIsActive;
 
         $this->loadProvinsis();
         $this->loadAlamatList();
@@ -297,31 +299,33 @@ new class extends Component {
             {{-- Sidebar Sections --}}
             <div class="w-full md:w-1/3 space-y-6">
                 {{-- Account Section --}}
-                @if(!$user->wafat)
-                <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
-                        <flux:heading size="lg">{{ __('Account') }}</flux:heading>
-                        @if (!$accountIsActive)
-                            @if(!$showFormAkun)
-                                <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green" class="cursor-pointer" variant="primary">{{ __('Activate') }}</flux:button>
-                            @else
-                                <flux:button size="xs" wire:click="$set('showFormAkun', false)" class="cursor-pointer" variant="ghost">{{ __('Cancel') }}</flux:button>
-                            @endif
+                @can('update', $user)
+                    <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
+                        <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
+                            <flux:heading size="lg">{{ __('Account') }}</flux:heading>
+                                @if(!$accountIsActive)
+                                    <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green" class="cursor-pointer" variant="primary">{{ __('Activate') }}</flux:button>
+                                @else
+                                    @if($showFormAkun)
+                                        <flux:button size="xs" wire:click="$set('showFormAkun', false)" class="cursor-pointer" variant="ghost">{{ __('Cancel') }}</flux:button>
+                                    @else
+                                        <flux:button size="xs" wire:click="$set('showFormAkun', true)" class="cursor-pointer" variant="primary" color="yellow">{{ __('Edit') }}</flux:button>
+                                    @endif
+                                @endif
+                        </div>
+                        
+                        @if ($showFormAkun)
+                        <div class="p-4 space-y-4">
+                            <flux:input wire:model="email" type="email" :label="__('Email')" />
+                            <flux:input wire:model="password" type="password" :label="__('Password')" />
+                            <div class="flex justify-end gap-2">
+                                <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost" class="cursor-pointer">{{ __('Cancel') }}</flux:button>
+                                <flux:button wire:click="updateAkun" size="sm" color="blue" class="cursor-pointer" variant="primary">{{ __('Save') }}</flux:button>
+                            </div>
+                        </div>
                         @endif
                     </div>
-                    
-                    @if ($showFormAkun)
-                    <div class="p-4 space-y-4">
-                        <flux:input wire:model="email" type="email" :label="__('Email')" />
-                        <flux:input wire:model="password" type="password" :label="__('Password')" />
-                        <div class="flex justify-end gap-2">
-                            <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost" class="cursor-pointer">{{ __('Cancel') }}</flux:button>
-                            <flux:button wire:click="updateAkun" size="sm" color="blue" class="cursor-pointer" variant="primary">{{ __('Save') }}</flux:button>
-                        </div>
-                    </div>
-                    @endif
-                </div>
-                @endif
+                @endcan
 
                 {{-- Death Section --}}
                 @if($user->wafat)
