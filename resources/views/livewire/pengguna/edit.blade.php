@@ -302,7 +302,14 @@ new class extends Component {
                 @can('update', $user)
                     <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
                         <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
-                            <flux:heading size="lg">{{ __('Account') }}</flux:heading>
+                            <flux:heading size="lg">
+                                {{ __('Account') }}
+                                @if($accountIsActive)
+                                    <flux:icon name="lock-open" class="text-green-500 inline-block" variant="micro"/>
+                                @else
+                                    <flux:icon name="lock-closed" class="text-red-500 inline-block" variant="micro"/>
+                                @endif
+                            </flux:heading>
                                 @if(!$accountIsActive)
                                     <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green" class="cursor-pointer" variant="primary">{{ __('Activate') }}</flux:button>
                                 @else
@@ -320,7 +327,11 @@ new class extends Component {
                             <flux:input wire:model="password" type="password" :label="__('Password')" />
                             <div class="flex justify-end gap-2">
                                 <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost" class="cursor-pointer">{{ __('Cancel') }}</flux:button>
-                                <flux:button wire:click="updateAkun" size="sm" color="blue" class="cursor-pointer" variant="primary">{{ __('Save') }}</flux:button>
+                                @if($accountIsActive)
+                                    <flux:button wire:click="updateAkun" size="sm" color="yellow" class="cursor-pointer" variant="primary">{{ __('Update') }}</flux:button>
+                                @else
+                                    <flux:button wire:click="updateAkun" size="sm" color="blue" class="cursor-pointer" variant="primary">{{ __('Save') }}</flux:button>
+                                @endif
                             </div>
                         </div>
                         @endif
