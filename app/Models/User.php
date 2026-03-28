@@ -174,24 +174,24 @@ class User extends Authenticatable
         $relatedIds = [$this->id];
         
         // 1. All Ancestors (Iterative walk up)
-        $currentLayer = [$this->id];
-        while (!empty($currentLayer)) {
-            $parents = self::whereIn('id', $currentLayer)
-                ->where(function($q) {
-                    $q->whereNotNull('ayah_id')->orWhereNotNull('ibu_id');
-                })
-                ->get(['ayah_id', 'ibu_id'])
-                ->flatMap(fn($u) => [$u->ayah_id, $u->ibu_id])
-                ->filter()
-                ->unique()
-                ->toArray();
+        // $currentLayer = [$this->id];
+        // while (!empty($currentLayer)) {
+        //     $parents = self::whereIn('id', $currentLayer)
+        //         ->where(function($q) {
+        //             $q->whereNotNull('ayah_id')->orWhereNotNull('ibu_id');
+        //         })
+        //         ->get(['ayah_id', 'ibu_id'])
+        //         ->flatMap(fn($u) => [$u->ayah_id, $u->ibu_id])
+        //         ->filter()
+        //         ->unique()
+        //         ->toArray();
                 
-            $newParents = array_diff($parents, $relatedIds);
-            if (empty($newParents)) break;
+        //     $newParents = array_diff($parents, $relatedIds);
+        //     if (empty($newParents)) break;
             
-            $relatedIds = array_merge($relatedIds, $newParents);
-            $currentLayer = $newParents;
-        }
+        //     $relatedIds = array_merge($relatedIds, $newParents);
+        //     $currentLayer = $newParents;
+        // }
 
         // 2. All Descendants (Iterative walk down)
         $currentLayer = [$this->id];
