@@ -146,17 +146,18 @@ new class extends Component {
     }
 };
 ?>
-<section class="item-center mx-auto w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
-    <div class="relative my-6 flex w-full items-center justify-between border-b pb-4">
-        <div>
-            <flux:heading size="xl" level="1">
-                {{ __('Family Tree') }} Bani {{ $user->name }}
-            </flux:heading>
-            <flux:subheading size="lg" class="mt-1">
-                {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
-            </flux:subheading>
-        </div>
-        <div class="flex items-center gap-2">
+<section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
+    <div class="w-full">
+        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <flux:heading size="xl" level="1">
+                    {{ __('Family Tree') }} Bani {{ $user->name }}
+                </flux:heading>
+                <flux:subheading size="lg" class="mt-1">
+                    {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
+                </flux:subheading>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
             <flux:button id="btn-fullscreen" onclick="toggleFullscreen()" color="zinc" class="cursor-pointer"
                 variant="outline">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -177,9 +178,12 @@ new class extends Component {
         </div>
     </div>
 
+    <flux:separator variant="subtle" />
+
     <div id="tree-wrapper"
-        class="relative mt-4 h-[75vh] min-h-[700px] w-full overflow-hidden rounded bg-white p-0 dark:bg-zinc-900">
+        class="relative mt-6 h-[75vh] min-h-[700px] w-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div id="FamilyChart" class="absolute inset-0 h-full w-full"></div>
+    </div>
     </div>
 </section>
 

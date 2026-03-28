@@ -177,14 +177,16 @@ new class extends Component {
 ?>
 <section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
     <div class="w-full">
-        <div class="relative my-6 flex w-full justify-between items-center">
+        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <flux:heading size="xl" level="1">{{ $user->name }}</flux:heading>
-                <flux:subheading size="lg">{{ __('Edit') }}</flux:subheading>
+                <flux:subheading size="lg" class="mt-1">{{ __('Edit') }}</flux:subheading>
             </div>
-            <flux:button color="sky" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">
-                {{ __('Detail') }}
-            </flux:button>
+            <div class="flex flex-wrap items-center gap-2">
+                <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">
+                    {{ __('Detail') }}
+                </flux:button>
+            </div>
         </div>
 
         <flux:separator variant="subtle" />
@@ -255,7 +257,7 @@ new class extends Component {
                     </div>
 
                     <div class="p-4 bg-gray-50 dark:bg-zinc-800/50 border-t dark:border-zinc-700 flex justify-end">
-                        <flux:button wire:click="update" color="yellow" variant="primary">{{ __('Save') }}</flux:button>
+                        <flux:button wire:click="update" color="yellow" variant="primary" style="cursor: pointer;">{{ __('Update') }}</flux:button>
                     </div>
                 </div>
             </div>
@@ -268,9 +270,11 @@ new class extends Component {
                     <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
                         <flux:heading size="lg">{{ __('Account') }}</flux:heading>
                         @if (!$accountIsActive)
-                            <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green">{{ __('Activate') }}</flux:button>
-                        @else
-                            <flux:badge color="sky" size="sm">{{ __('Active') }}</flux:badge>
+                            @if(!$showFormAkun)
+                                <flux:button size="xs" wire:click="$set('showFormAkun', true)" color="green" class="cursor-pointer" variant="primary">{{ __('Activate') }}</flux:button>
+                            @else
+                                <flux:button size="xs" wire:click="$set('showFormAkun', false)" class="cursor-pointer" variant="ghost">{{ __('Cancel') }}</flux:button>
+                            @endif
                         @endif
                     </div>
                     
@@ -279,8 +283,8 @@ new class extends Component {
                         <flux:input wire:model="email" type="email" :label="__('Email')" />
                         <flux:input wire:model="password" type="password" :label="__('Password')" />
                         <div class="flex justify-end gap-2">
-                            <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
-                            <flux:button wire:click="updateAkun" size="sm" color="blue">{{ __('Save') }}</flux:button>
+                            <flux:button wire:click="$set('showFormAkun', false)" size="sm" variant="ghost" class="cursor-pointer">{{ __('Cancel') }}</flux:button>
+                            <flux:button wire:click="updateAkun" size="sm" color="blue" class="cursor-pointer" variant="primary">{{ __('Save') }}</flux:button>
                         </div>
                     </div>
                     @endif
@@ -336,7 +340,7 @@ new class extends Component {
                 @can('delete', $user)
                 <div class="p-4 border border-red-200 dark:border-red-900/50 rounded-lg bg-red-50 dark:bg-red-900/20">
                     <flux:heading size="sm" class="text-red-700 dark:text-red-400 mb-2">{{ __('Danger Zone') }}</flux:heading>
-                    <flux:button color="red" class="w-full" variant="ghost"
+                    <flux:button color="red" class="w-full" variant="ghost" style="cursor: pointer;"
                         wire:click="delete('{{ $user->id }}')"
                         wire:confirm="{{ __('Are you sure?') }}">
                         {{ __('Delete User') }}

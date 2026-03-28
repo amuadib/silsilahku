@@ -169,17 +169,18 @@ new class extends Component {
         }"
     x-init="initTreant();"
     x-on:livewire:navigated.window="initTreant()"
-    class="item-center mx-auto w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
-    <div class="relative my-6 flex w-full items-center justify-between border-b pb-4">
-        <div>
-            <flux:heading size="xl" level="1">
-                {{ __('Family Tree') }} Bani {{ $user->name }}
-            </flux:heading>
-            <flux:subheading size="lg" class="mt-1">
-                {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
-            </flux:subheading>
-        </div>
-        <div class="flex items-center gap-2">
+    class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
+    <div class="w-full">
+        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <flux:heading size="xl" level="1">
+                    {{ __('Family Tree') }} Bani {{ $user->name }}
+                </flux:heading>
+                <flux:subheading size="lg" class="mt-1">
+                    {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
+                </flux:subheading>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
             <flux:button.group variant="outline" class="mr-2">
                 <flux:button icon="plus" class="cursor-pointer" @click="zoom = Math.min(zoom + 0.1, 2)" />
                 <flux:button variant="filled" class="pointer-events-none w-14! px-0! text-xs!">
@@ -206,6 +207,8 @@ new class extends Component {
         </div>
     </div>
 
+    <flux:separator variant="subtle" />
+
     <div id="tree-wrapper"
         x-ref="treeWrapper"
         @mousedown="startDragging($event)"
@@ -215,8 +218,9 @@ new class extends Component {
         @touchstart="startDragging($event)"
         @touchmove="moveDragging($event)"
         @touchend="stopDragging()"
-        class="mt-4 overflow-auto rounded min-h-[600px] bg-white p-0 dark:bg-zinc-900 cursor-grab">
+        class="mt-6 overflow-auto rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 cursor-grab min-h-[600px]">
         <div x-ref="treeStructure" id="tree-structure" :style="'zoom: ' + zoom + '; transition: zoom 0.2s;'"></div>
+    </div>
     </div>
 </section>
 

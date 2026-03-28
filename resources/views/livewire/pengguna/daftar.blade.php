@@ -82,18 +82,18 @@ new class extends Component {
     }
 };
 ?>
-<section class="item-center mx-auto w-full px-6 lg:px-8 [:where(&)]:max-w-7xl">
-    <div
-        class="relative my-6 flex w-full flex-col justify-between border-b pb-4 sm:flex-row sm:items-center dark:border-zinc-700">
-        <div class="mb-4 sm:mb-0">
-            <flux:heading size="xl" level="1">
-                {{ __('List of Family members') }} Bani {{ $user->name }}
-            </flux:heading>
-            <flux:subheading size="lg" class="mt-1">
-                {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
-            </flux:subheading>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
+<section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
+    <div class="w-full">
+        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <flux:heading size="xl" level="1">
+                    {{ __('List of Family members') }} Bani {{ $user->name }}
+                </flux:heading>
+                <flux:subheading size="lg" class="mt-1">
+                    {{ __('Members Count') }}: <span class="font-bold">{{ $totalMember }}</span>
+                </flux:subheading>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
             <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate
                 class="cursor-pointer" variant="outline">
                 {{ __('Family Tree') }}
@@ -105,12 +105,15 @@ new class extends Component {
         </div>
     </div>
 
+    <flux:separator variant="subtle" />
+
     <div
-        class="mt-4 overflow-hidden rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        class="mt-6 overflow-hidden rounded-lg border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <div class="text-zinc-800 dark:text-zinc-200">
             @if (isset($treeData) && !empty($treeData))
                 @include('livewire.pengguna._daftar-node', ['node' => $treeData, 'prefix' => '1'])
             @endif
         </div>
+    </div>
     </div>
 </section>

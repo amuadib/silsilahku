@@ -153,6 +153,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Address::class,'address_id', 'id');
     }
+    public function alamatMakam()
+    {
+        return $this->belongsTo(Address::class,'memorial_address_id', 'id');
+    }
     public function isAdmin()
     {
         return in_array($this->email, explode(';', env('ADMIN_EMAILS')));

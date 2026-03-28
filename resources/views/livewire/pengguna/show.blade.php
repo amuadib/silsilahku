@@ -132,12 +132,12 @@ new class extends Component {
 
 <section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
     <div class="w-full">
-        <div class="relative my-6 flex w-full justify-between items-center">
+        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <flux:heading size="xl" level="1">{{ $user->name }} {{ $user->wafat ? '(Alm)' : '' }}</flux:heading>
-                <flux:subheading size="lg">{{ __('Profile Detail') }}</flux:subheading>
+                <flux:subheading size="lg" class="mt-1">{{ __('Profile Detail') }}</flux:subheading>
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate variant="outline">
                     {{ __('List of Family members') }}
                 </flux:button>
@@ -167,17 +167,21 @@ new class extends Component {
                     </div>
 
                     <div class="p-4 space-y-3 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between ">
                             <span class="text-gray-500 dark:text-zinc-400">{{ __('Birthday') }}</span>
                             <span>{{ $user->tanggal_lahir?->format('d M Y') ?: '-' }}</span>
                         </div>
                         @if ($user->wafat)
-                        <div class="flex justify-between">
+                        <div class="flex justify-between border-t dark:border-zinc-700 pt-3">
                             <span class="text-gray-500 dark:text-zinc-400 block mb-1">{{ __('Deathday') }}</span>
                             <span>{{ $user->tanggal_wafat?->format('d M Y') ?: '-' }}</span>
                         </div>
+                        <div class="border-t dark:border-zinc-700 pt-3">
+                            <span class="text-gray-500 dark:text-zinc-400 block mb-1">{{ __('Memorial Address') }}</span>
+                            <span class="text-xs">{{ $user->alamatMakam?->full_address ?: '-' }}</span>
+                        </div>
                         @endif
-                        <div class="flex justify-between">
+                        <div class="border-t dark:border-zinc-700 pt-3 flex justify-between">
                             <span class="text-gray-500 dark:text-zinc-400">{{ __('Age') }}</span>
                             <span>
                                 @if ($user->wafat)
@@ -187,15 +191,15 @@ new class extends Component {
                                 @endif
                             </span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="border-t dark:border-zinc-700 pt-3 flex justify-between">
                             <span class="text-gray-500 dark:text-zinc-400">{{ __('Birth order') }}</span>
                             <span>{{ $user->anak_ke ?: '-' }}</span>
                         </div>
-                        <div class="border-t dark:border-zinc-700 pt-3">
+                        <div class="border-t dark:border-zinc-700 pt-3 flex justify-between">
                             <span class="text-gray-500 dark:text-zinc-400 block mb-1">{{ __('Email') }}</span>
                             <span>{{ $user->email ?: '-' }}</span>
                         </div>
-                        <div class="border-t dark:border-zinc-700 pt-3">
+                        <div class="border-t dark:border-zinc-700 pt-3 flex justify-between">
                             <span class="text-gray-500 dark:text-zinc-400 block mb-1">{{ __('Phone') }}</span>
                             <span>{{ $user->hp ?: '-' }}</span>
                         </div>
