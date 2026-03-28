@@ -15,8 +15,12 @@
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
 
-{{-- Libraries for Family Tree (loaded once with wire:navigate) --}}
+{{-- Libraries for Family Tree --}}
 <script src="{{ asset('js/raphael.min.js') }}" data-navigate-once></script>
 <script src="{{ asset('js/Treant.min.js') }}" data-navigate-once></script>
+
+{{-- Tom Select for Searchable Dropdowns --}}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet" data-navigate-once>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" data-navigate-once></script>
 
 @stack('styles')

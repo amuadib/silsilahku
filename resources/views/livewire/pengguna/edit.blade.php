@@ -242,12 +242,12 @@ new class extends Component {
                                 @else
                                     <div class="flex gap-2 items-center">
                                         <div class="flex-1 w-full">
-                                            <flux:select wire:model.live="address_id" :placeholder="__('Select existing Address')">
+                                            <x-searchable-select wire:model.live="address_id" :placeholder="__('Select existing Address')">
                                                 <option value="">{{ __('Select existing Address') }}</option>
                                                 @foreach ($alamat_list as $id => $label)
                                                     <option value="{{ $id }}">{{ $label }}</option>
                                                 @endforeach
-                                            </flux:select>
+                                            </x-searchable-select>
                                         </div>
                                         <flux:button wire:click="showFormTambahAlamat(true)" icon="plus" variant="subtle" />
                                     </div>
@@ -314,12 +314,12 @@ new class extends Component {
                                 @else
                                     <div class="flex gap-2 items-center">
                                         <div class="flex-1 w-full">
-                                            <flux:select wire:model.live="alamat_makam" :placeholder="__('Select existing Address')">
+                                            <x-searchable-select wire:model.live="alamat_makam" :placeholder="__('Select existing Address')">
                                                 <option value="">{{ __('Select existing') }}</option>
                                                 @foreach ($alamat_list as $id => $label)
                                                     <option value="{{ $id }}">{{ $label }}</option>
                                                 @endforeach
-                                            </flux:select>
+                                            </x-searchable-select>
                                         </div>
                                         <flux:button wire:click="showFormTambahAlamatMakam(true)" icon="plus" variant="subtle" />
                                     </div>
