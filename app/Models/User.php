@@ -210,12 +210,12 @@ class User extends Authenticatable
         
         // 3. Spouses and Siblings of everyone currently in relatedIds
         // Using subqueries for better performance on larger sets
-        $siblings = self::whereIn('ortu_id', function($q) use ($relatedIds) {
-                $q->select('ortu_id')->from('users')->whereIn('id', $relatedIds)->whereNotNull('ortu_id');
-            })
-            ->pluck('id')
-            ->toArray();
-        $relatedIds = array_merge($relatedIds, $siblings);
+        // $siblings = self::whereIn('ortu_id', function($q) use ($relatedIds) {
+        //         $q->select('ortu_id')->from('users')->whereIn('id', $relatedIds)->whereNotNull('ortu_id');
+        //     })
+        //     ->pluck('id')
+        //     ->toArray();
+        // $relatedIds = array_merge($relatedIds, $siblings);
         
         $spouseIds = Pernikahan::whereIn('suami_id', $relatedIds)->pluck('istri_id')
             ->merge(Pernikahan::whereIn('istri_id', $relatedIds)->pluck('suami_id'))
