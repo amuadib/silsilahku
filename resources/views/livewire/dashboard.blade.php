@@ -109,12 +109,13 @@ new class extends Component {
                                             </div>
                                         @endif
                                         <div class="flex flex-col">
-                                            <span class="font-semibold">
-                                                {{ $u->name }}
-                                                @if ($u->wafat)
-                                                    <span class="text-xs">(Alm)</span>
-                                                @endif
-                                            </span>
+                                                <a href="{{ route('pengguna.show', $u->id) }}" wire:navigate
+                                                    class="font-semibold cursor-pointer hover:underline hover:text-blue-600 dark:hover:text-blue-400">
+                                                    {{ $u->name }}
+                                                    @if ($u->wafat)
+                                                        (Alm)
+                                                    @endif
+                                                </a>
                                             <span class="text-xs text-zinc-400">{{ $u->email }}</span>
                                         </div>
                                     </div>
@@ -141,15 +142,20 @@ new class extends Component {
                                 </td>
                                 <td class="px-4 py-2">
                                     <div class="flex items-center gap-2">
-                                        <flux:button size="sm" variant="ghost" icon="eye"
-                                            href="{{ route('pengguna.show', $u->id) }}" wire:navigate />
                                         @can('update', $u)
-                                            <flux:button size="sm" variant="ghost" icon="pencil-square"
+                                            <flux:button size="sm" variant="primary" color="yellow" icon="pencil-square"
                                                 href="{{ route('pengguna.edit', $u->id) }}" wire:navigate />
                                         @endcan
-                                        <flux:button size="sm" variant="ghost" icon="share"
-                                            href="{{ route('pengguna.pohon', $u->id) }}" wire:navigate
+                                        <flux:button size="sm" variant="primary" color="blue" icon="share"
+                                            href="{{ route('pengguna.pohon-v2', $u->id) }}" wire:navigate
                                             title="{{ __('View Tree') }}" />
+                                        <flux:button size="sm" variant="primary" color="green" icon="list-bullet"
+                                            href="{{ route('pengguna.daftar', $u->id) }}" wire:navigate
+                                            title="{{ __('List of Family members') }}" />
+                                        @can('delete', $u)
+                                            <flux:button size="sm" variant="primary" color="red" icon="trash" class="cursor-pointer"
+                                                wire:click="delete({{ $u->id }})" wire:confirm="{{ __('Are you sure you want to delete this user?') }}"/>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
