@@ -68,12 +68,32 @@ new class extends Component {
     public function showFormTambahAlamat($value)
     {
         $this->formTambahAlamatVisible = $value;
-        if ($value) $this->address_id = null;
+        if ($value) {
+            $this->address_id = null;
+            $this->resetAddressForm();
+        }
     }
 
     public function showFormTambahAlamatMakam($value)
     {
         $this->formTambahAlamatMakamVisible = $value;
+        if ($value) {
+            $this->alamat_makam = null;
+            $this->resetAddressForm();
+        }
+    }
+
+    protected function resetAddressForm()
+    {
+        $this->selectedProvinsi = '';
+        $this->selectedKabupaten = '';
+        $this->selectedKecamatan = '';
+        $this->selectedDesa = '';
+        $this->alamat = '';
+        $this->alamat_makam_baru = '';
+        $this->kabupatens = [];
+        $this->kecamatans = [];
+        $this->desas = [];
     }
 
     public function update()
@@ -150,12 +170,24 @@ new class extends Component {
     {
         $validated = $this->validate([
             'tanggal_wafat' => 'nullable|date',
-            'alamat_makam' => 'nullable',
-            'alamat_makam_baru' => 'nullable|string',
         ]);
 
-        if (!empty($this->alamat_makam_baru)) {
-            $address = Address::create(['alamat' => $this->alamat_makam_baru]);
+        if ($this->formTambahAlamatMakamVisible && ($this->selectedDesa || $this->selectedKecamatan || $this->selectedKabupaten || $this->selectedProvinsi || $this->alamat_makam_baru)) {
+            $prov = Provinsi::where('kode', $this->selectedProvinsi)->first();
+            $kab = KabupatenKota::where('kode', $this->selectedKabupaten)->first();
+            $kec = Kecamatan::where('kode', $this->selectedKecamatan)->first();
+            $desa = DesaKelurahan::where('kode', $this->selectedDesa)->first();
+
+            $address = Address::create([
+                'alamat' => $this->alamat_makam_baru ?: null,
+                'kode_desa' => $desa?->kode,
+                'nama_desa' => $desa?->nama,
+                'nama_kecamatan' => $kec?->nama,
+                'nama_kabupaten' => $kab?->nama,
+                'nama_provinsi' => $prov?->nama,
+                'lat' => $desa?->lat,
+                'lng' => $desa?->lng,
+            ]);
             $validated['memorial_address_id'] = $address->id;
         } else {
             $validated['memorial_address_id'] = $this->alamat_makam;
@@ -309,13 +341,14 @@ new class extends Component {
                             <flux:label>{{ __('Memorial Address') }}</flux:label>
                             <div class="mt-2 space-y-2">
                                 @if($formTambahAlamatMakamVisible)
-                                    <flux:button wire:click="showFormTambahAlamatMakam(false)" size="sm" variant="subtle">{{ __('Cancel') }}</flux:button>
-                                    <flux:textarea wire:model="alamat_makam_baru" rows="2" />
+                                    <flux:button wire:click="showFormTambahAlamatMakam(false)" size="sm" variant="subtle">{{ __('Select existing Address') }}</flux:button>
+                                    <x-address-picker :provinsis="$provinsis" :kabupatens="$kabupatens" :kecamatans="$kecamatans" :desas="$desas" />
+                                    <flux:textarea wire:model="alamat_makam_baru" rows="2" :placeholder="__('Full Address Detail')" />
                                 @else
                                     <div class="flex gap-2 items-center">
                                         <div class="flex-1 w-full">
                                             <x-searchable-select wire:model.live="alamat_makam" :placeholder="__('Select existing Address')">
-                                                <option value="">{{ __('Select existing') }}</option>
+                                                <option value="">{{ __('Select existing Address') }}</option>
                                                 @foreach ($alamat_list as $id => $label)
                                                     <option value="{{ $id }}">{{ $label }}</option>
                                                 @endforeach
@@ -328,8 +361,8 @@ new class extends Component {
                         </flux:field>
 
                         <div class="flex justify-end gap-2">
-                            <flux:button wire:click="$set('showFormKematian', false)" size="sm" variant="ghost">{{ __('Cancel') }}</flux:button>
-                            <flux:button wire:click="updateKematian" size="sm" color="zinc">{{ __('Save') }}</flux:button>
+                            <flux:button wire:click="$set('showFormKematian', false)" size="sm" variant="ghost" style="cursor: pointer;">{{ __('Cancel') }}</flux:button>
+                            <flux:button wire:click="updateKematian" size="sm" color="blue" variant="primary" style="cursor: pointer;">{{ __('Save') }}</flux:button>
                         </div>
                     </div>
                     @endif
