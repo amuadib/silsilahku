@@ -11,7 +11,7 @@
                     {{ __('Add new name') }}</flux:button>
             @endif
             @if ($userExist)
-                <div class="mb-2">
+                <div class="mb-2" wire:key="form-child-exist">
                     <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Search Name') }}</label>
                     <x-searchable-select wire:model="userFromSelection">
                         <option value="">{{ __('Select from list') }}</option>
@@ -21,11 +21,11 @@
                     </x-searchable-select>
                 </div>
             @else
-                <div class="mb-2">
+                <div class="mb-2" wire:key="form-child-new-name">
                     <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Child Name') }}</label>
                     <flux:input wire:model="name" type="text" placeholder="{{ __('Enter Child Name') }}" />
                 </div>
-                <div class="mb-2">
+                <div class="mb-2" wire:key="form-child-new-gender">
                     <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Gender') }}</label>
                     <label class="inline-flex cursor-pointer items-center gap-2">
                         <input type="radio" wire:model="jenis_kelamin" value="1" class="accent-blue-600">
@@ -61,21 +61,27 @@
             </div>
         @else
             @if ($activeForm === 'ayah' || $activeForm === 'suami')
-                <x-searchable-select wire:model="userFromSelection">
+                <div wire:key="form-male-select">
+                    <x-searchable-select wire:model="userFromSelection">
                     <option value="">{{ __('Select from Male list') }}</option>
                     @foreach ($userList as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
-                </x-searchable-select>
+                    </x-searchable-select>
+                </div>
             @elseif ($activeForm === 'ibu' || $activeForm === 'istri')
-                <x-searchable-select wire:model="userFromSelection">
+                <div wire:key="form-female-select">
+                    <x-searchable-select wire:model="userFromSelection">
                     <option value="">{{ __('Select from Female list') }}</option>
                     @foreach ($userList as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
                     @endforeach
-                </x-searchable-select>
+                    </x-searchable-select>
+                </div>
             @endif
-            <flux:input wire:model="userFromInput" type="text" placeholder="{{ __('Enter new Name') }}" />
+            <div class="mt-2" wire:key="form-new-name-input">
+                <flux:input wire:model="userFromInput" type="text" placeholder="{{ __('Enter new Name') }}" />
+            </div>
     @endif
     <flux:button wire:click="save" class="cursor-pointer" color="blue" variant="primary">{{ __('Save') }}
     </flux:button>

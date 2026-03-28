@@ -1,6 +1,6 @@
 @props(['placeholder' => __('Select...')])
 
-<div wire:ignore class="flex w-full">
+<div wire:ignore class="flex w-full" {{ $attributes->whereStartsWith('wire:key') }}>
     <select
         x-data="{
             tomSelectInstance: null,
