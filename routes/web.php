@@ -6,6 +6,7 @@ use Livewire\Volt\Volt;
 
 Volt::route('pengguna/{id}/pohon-v2', 'pengguna.pohon-v2')->name('pengguna.pohon-v2');
 Volt::route('pengguna/{id}/pohon', 'pengguna.pohon')->name('pengguna.pohon');
+Volt::route('pengguna/{id}/daftar', 'pengguna.daftar')->name('pengguna.daftar');
 Route::middleware(['auth', 'verified'])->group(function () {
 Volt::route('/', 'dashboard')->name('dashboard');
     Volt::route('pengguna/{id}/edit', 'pengguna.edit')->name( 'pengguna.edit');
