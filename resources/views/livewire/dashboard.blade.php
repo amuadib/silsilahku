@@ -47,14 +47,14 @@ new class extends Component {
     <div class="w-full">
         <flux:main>
             {{-- Header --}}
-            <div class="mb-6 flex items-center justify-between">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <flux:heading size="xl" level="1">{{ __('Individual List') }}</flux:heading>
                     <flux:subheading>{{ __('List of all individuals in the family tree') }}</flux:subheading>
                 </div>
-                {{-- <flux:button variant="primary" icon="plus" href="{{ route('profil') }}" wire:navigate>
-                    {{ __('Add User') }}
-                </flux:button> --}}
+                <flux:button color="cyan" href="{{ route('pengguna.cari-hubungan') }}" wire:navigate variant="outline" icon="arrows-right-left">
+                    {{ __('Find Relationship') }}
+                </flux:button>
             </div>
 
             {{-- Filter --}}

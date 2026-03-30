@@ -9,8 +9,9 @@ Volt::route('pengguna/{id}/pohon', 'pengguna.pohon')->name('pengguna.pohon');
 Volt::route('pengguna/{id}/daftar', 'pengguna.daftar')->name('pengguna.daftar');
 Volt::route('pengguna/{id}/daftar-collapse', 'pengguna.daftar-collapse')->name('pengguna.daftar-collapse');
 Route::middleware(['auth', 'verified'])->group(function () {
-Volt::route('/', 'dashboard')->name('dashboard');
-    Volt::route('pengguna/{id}/edit', 'pengguna.edit')->name( 'pengguna.edit');
+    Volt::route('/', 'dashboard')->name('dashboard');
+    Volt::route('pengguna/hubungan', 'pengguna.hubungan')->name('pengguna.hubungan');
+    Volt::route('pengguna/{id}/edit', 'pengguna.edit')->name('pengguna.edit');
     Volt::route('pengguna/{id}', 'pengguna.show')->name('pengguna.show');
     Volt::route('activity-log', 'activity-log.index')
         ->name('activity-log.index')

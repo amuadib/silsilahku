@@ -113,6 +113,12 @@ new class extends Component {
                     class="cursor-pointer" variant="outline">
                     {{ __('List') }} (Collapse)
                 </flux:button>
+                @auth
+                <flux:button color="cyan" href="{{ route('pengguna.cari-hubungan') }}" wire:navigate
+                    class="cursor-pointer" variant="outline" icon="arrows-right-left">
+                    {{ __('Find Relationship') }}
+                </flux:button>
+                @endauth
                 <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate
                     class="cursor-pointer" variant="primary">
                     {{ __('Detail') }}

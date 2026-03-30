@@ -147,6 +147,9 @@ new class extends Component {
                 <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate variant="outline">
                     {{ __('Family Tree') }}
                 </flux:button>
+                <flux:button color="cyan" href="{{ route('pengguna.hubungan') }}" wire:navigate variant="outline" icon="arrows-right-left">
+                    {{ __('Find Relationship') }}
+                </flux:button>
                 @can('update', $user)
                     <flux:button color="yellow" href="{{ route('pengguna.edit', $user->id) }}" wire:navigate variant="primary">
                         {{ __('Edit') }}
