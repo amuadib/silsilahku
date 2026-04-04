@@ -420,121 +420,36 @@ new class extends Component {
                 </div>
             </div>
 
-            <div class="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-                {{-- Relationship Path List --}}
+            {{-- Full relationship chain text --}}
+            <div
+                class="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                 <div
-                    class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                    <div
-                        class="flex items-center gap-2 border-b border-zinc-100 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50">
-                        <svg class="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        <flux:heading size="lg">{{ __('Relationship Path') }}</flux:heading>
-                        <flux:badge size="sm" color="zinc" class="ml-auto">{{ count($result) }}
-                            {{ __('people') }}</flux:badge>
-                    </div>
-
-                    <div class="p-4">
-                        <div class="relative">
-                            {{-- Vertical line --}}
-                            @if (count($result) > 1)
-                                <div class="absolute bottom-0 left-[27px] top-0 w-0.5 bg-zinc-200 dark:bg-zinc-700"
-                                    style="top: 28px; bottom: 48px;"></div>
+                    class="flex items-center gap-2 border-b border-zinc-100 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50">
+                    <svg class="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <flux:heading size="lg">{{ __('Full Relationship Chain') }}</flux:heading>
+                </div>
+                <div class="p-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        @foreach ($result as $idx => $step)
+                            <a href="{{ route('pengguna.show', $step['user']['id']) }}" wire:navigate
+                                class="@if ($idx === 0) bg-blue-600 text-white hover:bg-blue-700 @elseif($idx === count($result) - 1) bg-indigo-600 text-white hover:bg-indigo-700 @else bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 @endif inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium shadow-sm transition-all hover:scale-105">
+                                {{ $step['user']['name'] }} {{ $step['user']['wafat'] ? '(Alm)' : '' }}
+                            </a>
+                            @if ($idx < count($result) - 1)
+                                <svg class="h-4 w-4 flex-shrink-0 text-zinc-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
                             @endif
-
-                            <div class="space-y-0">
-                                @foreach ($result as $idx => $step)
-                                    @php
-                                        $u = $step['user'];
-                                        $isFirst = $idx === 0;
-                                        $isLast = $idx === count($result) - 1;
-                                        $isHighlight = $isFirst || $isLast;
-                                        $avatarUrl = $u['foto']
-                                            ? asset('storage/' . $u['foto'])
-                                            : ($u['jenis_kelamin'] == '1'
-                                                ? asset('img/avatar-m.jpg')
-                                                : asset('img/avatar-f.jpg'));
-                                    @endphp
-
-                                    {{-- Relation arrow (between steps) --}}
-                                    @if ($idx > 0 && $step['relation_label'])
-                                        <div class="relative flex items-center py-1 pl-12">
-                                            <div
-                                                class="flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-0.5 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                                                <svg class="h-3 w-3" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                                @php
-                                                    $rel = $step['relation'];
-                                                    $relText = match ($rel) {
-                                                        'child_of_father', 'child_of_mother' => __('Child of'),
-                                                        'father_of' => __('Father of'),
-                                                        'mother_of' => __('Mother of'),
-                                                        'husband_of' => __('Husband of'),
-                                                        'wife_of' => __('Wife of'),
-                                                        'sibling_of' => __('Sibling of'),
-                                                        default => $rel,
-                                                    };
-                                                @endphp
-                                                {{ $relText }}
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    {{-- Person card --}}
-                                    <div
-                                        class="@if ($isHighlight) bg-blue-50 dark:bg-blue-900/20 @else hover:bg-zinc-50 dark:hover:bg-zinc-800/50 @endif relative flex items-center gap-3 rounded-lg p-2 transition-colors">
-
-                                        {{-- Step number / avatar container --}}
-                                        <div class="relative z-10 flex-shrink-0">
-                                            <div
-                                                class="@if ($isFirst) border-blue-400 @elseif($isLast) border-indigo-400 @else border-zinc-300 dark:border-zinc-600 @endif relative h-14 w-14 overflow-hidden rounded-full border-2 shadow-sm">
-                                                <img src="{{ $avatarUrl }}" alt="{{ $u['name'] }}"
-                                                    class="h-full w-full object-cover">
-                                            </div>
-                                            @if ($isFirst)
-                                                <div
-                                                    class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow">
-                                                    A</div>
-                                            @elseif($isLast)
-                                                <div
-                                                    class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white shadow">
-                                                    B</div>
-                                            @else
-                                                <div
-                                                    class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-500 text-[10px] font-bold text-white shadow">
-                                                    {{ $idx + 1 }}</div>
-                                            @endif
-                                        </div>
-
-                                        {{-- Info --}}
-                                        <div class="min-w-0 flex-1">
-                                            <a href="{{ route('pengguna.show', $u['id']) }}" wire:navigate
-                                                class="@if ($isHighlight) text-blue-700 dark:text-blue-300 @else text-zinc-800 dark:text-zinc-200 @endif block truncate text-sm font-semibold hover:underline">
-                                                {{ $u['name'] }} {{ $u['wafat'] ? '(Alm)' : '' }}
-                                            </a>
-                                            <div class="text-xs text-zinc-500 dark:text-zinc-400">
-                                                {{ $u['jenis_kelamin'] == '1' ? __('Male') : __('Female') }}
-                                                @if ($isFirst)
-                                                    <span
-                                                        class="font-medium text-blue-600 dark:text-blue-400">{{ __('Person 1') }}</span>
-                                                @endif
-                                                @if ($isLast)
-                                                    <span
-                                                        class="font-medium text-indigo-600 dark:text-indigo-400">{{ __('Person 2') }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
-
+            </div>
+            <div class="mt-6 grid grid-cols-1 gap-6">
                 {{-- Relationship Chart (Custom directional) --}}
                 <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
                     x-data="{ ready: false, zoom: 1 }"
@@ -581,36 +496,6 @@ new class extends Component {
                                 <p class="text-sm text-zinc-400">{{ __('Loading chart...') }}</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Full relationship chain text --}}
-            <div
-                class="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <div
-                    class="flex items-center gap-2 border-b border-zinc-100 bg-gray-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50">
-                    <svg class="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <flux:heading size="lg">{{ __('Full Relationship Chain') }}</flux:heading>
-                </div>
-                <div class="p-4">
-                    <div class="flex flex-wrap items-center gap-2">
-                        @foreach ($result as $idx => $step)
-                            <a href="{{ route('pengguna.show', $step['user']['id']) }}" wire:navigate
-                                class="@if ($idx === 0) bg-blue-600 text-white hover:bg-blue-700 @elseif($idx === count($result) - 1) bg-indigo-600 text-white hover:bg-indigo-700 @else bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 @endif inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium shadow-sm transition-all hover:scale-105">
-                                {{ $step['user']['name'] }} {{ $step['user']['wafat'] ? '(Alm)' : '' }}
-                            </a>
-                            @if ($idx < count($result) - 1)
-                                <svg class="h-4 w-4 flex-shrink-0 text-zinc-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5l7 7-7 7" />
-                                </svg>
-                            @endif
-                        @endforeach
                     </div>
                 </div>
             </div>
@@ -845,7 +730,7 @@ new class extends Component {
                     paths +=
                         `<rect x="${bgX}" y="${ly-lh+3}" width="${lw}" height="${lh}" rx="9" fill="${bgFill}" stroke="${stroke}" stroke-width="1" opacity="0.95"/>`;
                     paths +=
-                        `<text x="${lx}" y="${ly+2}" text-anchor="${lAnchor}" dominant-baseline="auto" font-size="10" font-style="italic" fill="${txtFill}" pointer-events="none">${label}</text>`;
+                        `<text x="${lx}" y="${ly-lh+14}" text-anchor="${lAnchor}" dominant-baseline="auto" font-size="10" font-style="italic" fill="${txtFill}" pointer-events="none">${label}</text>`;
                 }
             }
 
@@ -865,9 +750,9 @@ new class extends Component {
                 const href = `/pengguna/${u.id}`;
                 const defImg = isM ? '/img/avatar-m.jpg' : '/img/avatar-f.jpg';
 
-                const avatarHtml = foto
-                    ? `<img src="${foto}" style="width:70px;height:70px;object-fit:cover;" onerror="this.src='${defImg}'">`
-                    : silhouette;
+                const avatarHtml = foto ?
+                    `<img src="${foto}" style="width:70px;height:70px;object-fit:cover;" onerror="this.src='${defImg}'">` :
+                    silhouette;
 
                 const outline = isFirst ?
                     'box-shadow:0 0 0 3px #facc15,0 4px 6px rgba(0,0,0,0.15);' :

@@ -146,9 +146,9 @@ new class extends Component {
     }
 };
 ?>
-<section class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
+<section class="mx-auto w-full max-w-7xl px-6 lg:px-8">
     <div class="w-full">
-        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="relative my-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
                 <flux:heading size="xl" level="1">
                     {{ __('Family Tree') }} Bani {{ $user->name }}
@@ -158,40 +158,40 @@ new class extends Component {
                 </flux:subheading>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-            <flux:button id="btn-fullscreen" onclick="toggleFullscreen()" color="zinc" class="cursor-pointer"
-                variant="outline">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="mr-1 inline-block h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
-                {{ __('Full Screen') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.pohon', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('V1') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('List') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.daftar-collapse', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('List') }} (Collapse)
-            </flux:button>
-            <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="primary">
-                {{ __('Detail') }}
-            </flux:button>
+                <flux:button id="btn-fullscreen" onclick="toggleFullscreen()" color="zinc" class="cursor-pointer"
+                    variant="outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="mr-1 inline-block h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                    {{ __('Full Screen') }}
+                </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.pohon', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline">
+                    {{ __('V1') }}
+                </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline" icon="users">
+                    {{ __('List') }}
+                </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.daftar-collapse', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline" icon="share">
+                    {{ __('List') }} (Collapse)
+                </flux:button>
+                <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="primary" icon="eye">
+                    {{ __('Detail') }}
+                </flux:button>
+            </div>
         </div>
-    </div>
 
-    <flux:separator variant="subtle" />
+        <flux:separator variant="subtle" />
 
-    <div id="tree-wrapper"
-        class="relative mt-6 h-[75vh] min-h-[700px] w-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <div id="FamilyChart" class="absolute inset-0 h-full w-full"></div>
-    </div>
+        <div id="tree-wrapper"
+            class="relative mt-6 h-[75vh] min-h-[700px] w-full overflow-hidden rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div id="FamilyChart" class="absolute inset-0 h-full w-full"></div>
+        </div>
     </div>
 </section>
 
@@ -288,7 +288,7 @@ new class extends Component {
                 return;
             }
 
-            // Livewire 'wire:navigate' restores the exact HTML from cache when navigating back, 
+            // Livewire 'wire:navigate' restores the exact HTML from cache when navigating back,
             // but the f3 SVG nodes lose their internal Javascript drag/pan/zoom event listeners!
             // We MUST clear the frozen DOM elements and let createChart rebuild the interactive SVG!
             container.innerHTML = '';
@@ -328,7 +328,7 @@ new class extends Component {
                         `<img src="${d.data.foto_url}" class="w-full h-full object-cover" />` :
                         defaultAvatar;
 
-                    return `<div 
+                    return `<div
                         class="overflow-hidden rounded-md shadow-md transition-shadow cursor-pointer"
                         style="width: 220px; height: 70px; display: flex; background-color: ${bgColor};"
                     >
@@ -336,17 +336,17 @@ new class extends Component {
                         <div class="flex-shrink-0 flex items-center justify-center border-r border-black/10" style="width: 70px; height: 70px; background-color: rgba(0,0,0,0.15);">
                             ${avatarHtml}
                         </div>
-                        
+
                         <!-- Details Section (Center) -->
                         <div class="flex-1 flex items-center px-3" style="width: 110px;">
                             <span class="text-white font-medium text-sm leading-tight truncate-multiline">
                                 ${d.data.label || ''}
                             </span>
                         </div>
-                        
+
                         <!-- Detail Info Button (Right) -->
-                        <div 
-                            onclick="event.stopPropagation(); window.Livewire.navigate('${d.data.url}');" 
+                        <div
+                            onclick="event.stopPropagation(); window.Livewire.navigate('${d.data.url}');"
                             class="flex-shrink-0 flex items-center justify-center cursor-pointer hover:bg-black/20 transition-colors"
                             style="width: 40px; height: 70px; border-left: 1px solid rgba(0,0,0,0.1);"
                             title="Detail Profil"

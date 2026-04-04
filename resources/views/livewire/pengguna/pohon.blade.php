@@ -110,68 +110,64 @@ new class extends Component {
     }
 };
 ?>
-        <section x-data="{ 
-            zoom: 1,
-            isDragging: false, 
-            startX: 0, 
-            startY: 0, 
-            scrollLeft: 0, 
-            scrollTop: 0,
-            initTreant(retryCount = 0) {
-                if (typeof Treant !== 'undefined') {
-                    // Clear existing content to prevent duplicates or lingering nodes
-                    this.$refs.treeStructure.innerHTML = '';
-                    new Treant(@js($treeData));
-                } else if (retryCount < 10) {
-                    // If Treant is not ready, retry in 100ms
-                    setTimeout(() => this.initTreant(retryCount + 1), 100);
-                }
-            },
-            toggleFullscreen() {
-                let elem = this.$refs.treeWrapper;
-                if (!document.fullscreenElement) {
-                    if (elem.requestFullscreen) { elem.requestFullscreen(); }
-                    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-                    else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
-                } else {
-                    if (document.exitFullscreen) { document.exitFullscreen(); }
-                }
-            },
-            startDragging(e) {
-                if (e.target.closest('.node') || e.target.closest('.collapse-switch')) return;
-                this.isDragging = true;
-                const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-                const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
-                this.startX = pageX - this.$refs.treeWrapper.offsetLeft;
-                this.startY = pageY - this.$refs.treeWrapper.offsetTop;
-                this.scrollLeft = this.$refs.treeWrapper.scrollLeft;
-                this.scrollTop = this.$refs.treeWrapper.scrollTop;
-                this.$refs.treeWrapper.style.cursor = 'grabbing';
-                this.$refs.treeWrapper.style.userSelect = 'none';
-            },
-            stopDragging() {
-                this.isDragging = false;
-                this.$refs.treeWrapper.style.cursor = 'grab';
-                this.$refs.treeWrapper.style.userSelect = 'auto';
-            },
-            moveDragging(e) {
-                if (!this.isDragging) return;
-                if (e.touches) e.preventDefault(); 
-                const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
-                const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
-                const x = pageX - this.$refs.treeWrapper.offsetLeft;
-                const y = pageY - this.$refs.treeWrapper.offsetTop;
-                const walkX = (x - this.startX) * 1.5;
-                const walkY = (y - this.startY) * 1.5;
-                this.$refs.treeWrapper.scrollLeft = this.scrollLeft - walkX;
-                this.$refs.treeWrapper.scrollTop = this.scrollTop - walkY;
-            }
-        }"
-    x-init="initTreant();"
-    x-on:livewire:navigated.window="initTreant()"
-    class="mx-auto w-full px-6 lg:px-8 max-w-7xl">
+<section x-data="{
+    zoom: 1,
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    scrollLeft: 0,
+    scrollTop: 0,
+    initTreant(retryCount = 0) {
+        if (typeof Treant !== 'undefined') {
+            // Clear existing content to prevent duplicates or lingering nodes
+            this.$refs.treeStructure.innerHTML = '';
+            new Treant(@js($treeData));
+        } else if (retryCount < 10) {
+            // If Treant is not ready, retry in 100ms
+            setTimeout(() => this.initTreant(retryCount + 1), 100);
+        }
+    },
+    toggleFullscreen() {
+        let elem = this.$refs.treeWrapper;
+        if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) { elem.requestFullscreen(); } else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        } else {
+            if (document.exitFullscreen) { document.exitFullscreen(); }
+        }
+    },
+    startDragging(e) {
+        if (e.target.closest('.node') || e.target.closest('.collapse-switch')) return;
+        this.isDragging = true;
+        const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+        const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+        this.startX = pageX - this.$refs.treeWrapper.offsetLeft;
+        this.startY = pageY - this.$refs.treeWrapper.offsetTop;
+        this.scrollLeft = this.$refs.treeWrapper.scrollLeft;
+        this.scrollTop = this.$refs.treeWrapper.scrollTop;
+        this.$refs.treeWrapper.style.cursor = 'grabbing';
+        this.$refs.treeWrapper.style.userSelect = 'none';
+    },
+    stopDragging() {
+        this.isDragging = false;
+        this.$refs.treeWrapper.style.cursor = 'grab';
+        this.$refs.treeWrapper.style.userSelect = 'auto';
+    },
+    moveDragging(e) {
+        if (!this.isDragging) return;
+        if (e.touches) e.preventDefault();
+        const pageX = e.pageX || (e.touches ? e.touches[0].pageX : 0);
+        const pageY = e.pageY || (e.touches ? e.touches[0].pageY : 0);
+        const x = pageX - this.$refs.treeWrapper.offsetLeft;
+        const y = pageY - this.$refs.treeWrapper.offsetTop;
+        const walkX = (x - this.startX) * 1.5;
+        const walkY = (y - this.startY) * 1.5;
+        this.$refs.treeWrapper.scrollLeft = this.scrollLeft - walkX;
+        this.$refs.treeWrapper.scrollTop = this.scrollTop - walkY;
+    }
+}" x-init="initTreant();" x-on:livewire:navigated.window="initTreant()"
+    class="mx-auto w-full max-w-7xl px-6 lg:px-8">
     <div class="w-full">
-        <div class="relative my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="relative my-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
                 <flux:heading size="xl" level="1">
                     {{ __('Family Tree') }} Bani {{ $user->name }}
@@ -181,54 +177,50 @@ new class extends Component {
                 </flux:subheading>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-            <flux:button.group variant="outline" class="mr-2">
-                <flux:button icon="plus" class="cursor-pointer" @click="zoom = Math.min(zoom + 0.1, 2)" />
-                <flux:button variant="filled" class="pointer-events-none w-14! px-0! text-xs!">
-                    <span x-text="Math.round(zoom * 100) + '%'"></span>
+                <flux:button.group variant="outline" class="mr-2">
+                    <flux:button icon="plus" class="cursor-pointer" @click="zoom = Math.min(zoom + 0.1, 2)" />
+                    <flux:button variant="filled" class="w-14! px-0! text-xs! pointer-events-none">
+                        <span x-text="Math.round(zoom * 100) + '%'"></span>
+                    </flux:button>
+                    <flux:button icon="minus" class="cursor-pointer" @click="zoom = Math.max(zoom - 0.1, 0.5)" />
+                </flux:button.group>
+
+                <flux:button id="btn-fullscreen" @click="toggleFullscreen()" color="zinc" class="cursor-pointer"
+                    variant="outline">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="mr-1 inline-block h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                    </svg>
+                    {{ __('Full Screen') }}
                 </flux:button>
-                <flux:button icon="minus" class="cursor-pointer" @click="zoom = Math.max(zoom - 0.1, 0.5)" />
-            </flux:button.group>
-
-            <flux:button id="btn-fullscreen" @click="toggleFullscreen()" color="zinc" class="cursor-pointer" variant="outline">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="mr-1 h-5 w-5 inline-block">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-                </svg>
-                {{ __('Full Screen') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('V2') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('List') }}
-            </flux:button>
-            <flux:button color="zinc" href="{{ route('pengguna.daftar-collapse', $user->id) }}" wire:navigate
-                class="cursor-pointer" variant="outline">
-                {{ __('List') }} (Collapse)
-            </flux:button>
-            <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate class="cursor-pointer" variant="primary">
-                {{ __('Detail') }}
-            </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline">
+                    {{ __('V2') }}
+                </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline" icon="users">
+                    {{ __('List') }}
+                </flux:button>
+                <flux:button color="zinc" href="{{ route('pengguna.daftar-collapse', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="outline" icon="share">
+                    {{ __('List') }} (Collapse)
+                </flux:button>
+                <flux:button color="blue" icon="eye" href="{{ route('pengguna.show', $user->id) }}" wire:navigate
+                    class="cursor-pointer" variant="primary">
+                    {{ __('Detail') }}
+                </flux:button>
+            </div>
         </div>
-    </div>
 
-    <flux:separator variant="subtle" />
+        <flux:separator variant="subtle" />
 
-    <div id="tree-wrapper"
-        x-ref="treeWrapper"
-        @mousedown="startDragging($event)"
-        @mousemove="moveDragging($event)"
-        @mouseup="stopDragging()"
-        @mouseleave="stopDragging()"
-        @touchstart="startDragging($event)"
-        @touchmove="moveDragging($event)"
-        @touchend="stopDragging()"
-        class="mt-6 overflow-auto rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 cursor-grab min-h-[600px]">
-        <div x-ref="treeStructure" id="tree-structure" :style="'zoom: ' + zoom + '; transition: zoom 0.2s;'"></div>
-    </div>
+        <div id="tree-wrapper" x-ref="treeWrapper" @mousedown="startDragging($event)" @mousemove="moveDragging($event)"
+            @mouseup="stopDragging()" @mouseleave="stopDragging()" @touchstart="startDragging($event)"
+            @touchmove="moveDragging($event)" @touchend="stopDragging()"
+            class="mt-6 min-h-[600px] cursor-grab overflow-auto rounded-lg border border-zinc-200 bg-white p-0 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div x-ref="treeStructure" id="tree-structure" :style="'zoom: ' + zoom + '; transition: zoom 0.2s;'"></div>
+        </div>
     </div>
 </section>
 
@@ -237,7 +229,8 @@ new class extends Component {
         /* Treant Core CSS (minified base) */
         .Treant {
             position: relative;
-            overflow: visible !important; /* Crucial for collapsible switches */
+            overflow: visible !important;
+            /* Crucial for collapsible switches */
             padding: 0 !important;
         }
 
@@ -368,17 +361,19 @@ new class extends Component {
         }
 
         #tree-structure {
-            padding: 80px; /* Increased padding to prevent clipping at edges */
+            padding: 80px;
+            /* Increased padding to prevent clipping at edges */
             box-sizing: border-box;
             min-width: fit-content;
             min-height: fit-content;
         }
 
         /* Make nodes look interactive */
-        .node-laki, .node-perempuan {
+        .node-laki,
+        .node-perempuan {
             cursor: default;
         }
-        
+
         .Treant .node.collapsable {
             cursor: pointer;
         }
