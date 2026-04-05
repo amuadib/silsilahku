@@ -217,7 +217,7 @@ new class extends Component {
                 <flux:subheading size="lg" class="mt-1">{{ __('Edit') }}</flux:subheading>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <flux:button color="zinc" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="outline">
+                <flux:button color="blue" icon="eye" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="outline">
                     {{ __('Detail') }}
                 </flux:button>
             </div>

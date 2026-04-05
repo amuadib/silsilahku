@@ -183,5 +183,11 @@
     "Find Relationship Between Family Members": "Cari Hubungan Antar Anggota Keluarga",
     "Loading chart...": "Memuat bagan...",
     "Child of Father": "Anak dari Ayah",
-    "Child of Mother": "Anak dari Ibu"
+    "Child of Mother": "Anak dari Ibu",
+    "Remove": "Hapus",
+    "Relationship removed successfully.": "Hubungan berhasil dihapus.",
+    "Remove father relationship?": "Hapus hubungan ayah?",
+    "Remove mother relationship?": "Hapus hubungan ibu?",
+    "Remove parent relationship? This will also clear father and mother.": "Hapus hubungan orang tua? Ini juga akan menghapus data ayah dan ibu.",
+    "Remove this marriage relationship?": "Hapus hubungan pernikahan ini?"
 }

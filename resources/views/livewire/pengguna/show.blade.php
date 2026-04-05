@@ -110,6 +110,41 @@ new class extends Component {
         $this->reset(['activeForm', 'userFromSelection', 'userFromInput', 'name', 'jenis_kelamin', 'anak_ke', 'ortu_id', 'userExist']);
     }
 
+    public function removeHubungan(string $hubungan): void
+    {
+        $this->authorize('update', $this->user);
+
+        match ($hubungan) {
+            'ayah'     => $this->user->update(['ayah_id' => null]),
+            'ibu'      => $this->user->update(['ibu_id' => null]),
+            'orangtua' => $this->user->update(['ortu_id' => null, 'ayah_id' => null, 'ibu_id' => null]),
+            default    => null,
+        };
+
+        $this->user->refresh();
+        $this->toastSuccess(__('Relationship removed successfully.'));
+    }
+
+    public function removePernikahan(string $spouseId): void
+    {
+        $this->authorize('update', $this->user);
+
+        if ($this->user->jenis_kelamin == '1') {
+            // user = suami, spouse = istri
+            Pernikahan::where('suami_id', $this->user->id)
+                ->where('istri_id', $spouseId)
+                ->delete();
+        } else {
+            // user = istri, spouse = suami
+            Pernikahan::where('istri_id', $this->user->id)
+                ->where('suami_id', $spouseId)
+                ->delete();
+        }
+
+        $this->user->refresh();
+        $this->toastSuccess(__('Relationship removed successfully.'));
+    }
+
     public function delete($id)
     {
         $user = User::findOrFail($id);
@@ -243,10 +278,19 @@ new class extends Component {
                             <div class="w-32 font-medium text-gray-500 dark:text-zinc-400">{{ __('Father') }}</div>
                             <div class="flex-1">
                                 @if ($user->ayah)
-                                    <a href="{{ route('pengguna.show', $user->ayah->id) }}"
-                                        class="font-semibold text-blue-600 hover:underline">
-                                        {{ $user->ayah->name }} {{ $user->ayah->wafat ? '(Alm)' : '' }}
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('pengguna.show', $user->ayah->id) }}"
+                                            class="font-semibold text-blue-600 hover:underline">
+                                            {{ $user->ayah->name }} {{ $user->ayah->wafat ? '(Alm)' : '' }}
+                                        </a>
+                                        @can('update', $user)
+                                            <flux:button icon="x-mark" size="xs" variant="ghost" color="red"
+                                                class="cursor-pointer"
+                                                wire:click="removeHubungan('ayah')"
+                                                wire:confirm="{{ __('Remove father relationship?') }}"
+                                                title="{{ __('Remove') }}" />
+                                        @endcan
+                                    </div>
                                 @endif
 
                                 @if ($activeForm === 'ayah')
@@ -268,10 +312,19 @@ new class extends Component {
                             <div class="w-32 font-medium text-gray-500 dark:text-zinc-400">{{ __('Mother') }}</div>
                             <div class="flex-1">
                                 @if ($user->ibu)
-                                    <a href="{{ route('pengguna.show', $user->ibu->id) }}"
-                                        class="font-semibold text-blue-600 hover:underline">
-                                        {{ $user->ibu->name }} {{ $user->ibu->wafat ? '(Alm)' : '' }}
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('pengguna.show', $user->ibu->id) }}"
+                                            class="font-semibold text-blue-600 hover:underline">
+                                            {{ $user->ibu->name }} {{ $user->ibu->wafat ? '(Alm)' : '' }}
+                                        </a>
+                                        @can('update', $user)
+                                            <flux:button icon="x-mark" size="xs" variant="ghost" color="red"
+                                                class="cursor-pointer"
+                                                wire:click="removeHubungan('ibu')"
+                                                wire:confirm="{{ __('Remove mother relationship?') }}"
+                                                title="{{ __('Remove') }}" />
+                                        @endcan
+                                    </div>
                                 @endif
 
                                 @if ($activeForm === 'ibu')
@@ -290,10 +343,10 @@ new class extends Component {
 
                         {{-- Parents (Couple) --}}
                         <div class="flex flex-col justify-between gap-4 p-4 sm:flex-row sm:items-center">
-                            <div class="w-32 font-medium text-gray-500 dark:text-zinc-400">{{ __('Parents') }}</div>
+                            <div class="w-32 font-medium text-gray-500 dark:text-zinc-400">{{ __('Parent') }}</div>
                             <div class="flex-1">
                                 @if ($user->orangTua)
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <a href="{{ route('pengguna.show', $user->orangTua->suami->id) }}"
                                             class="text-blue-600 hover:underline">
                                             {{ $user->orangTua->suami->name }}
@@ -305,6 +358,13 @@ new class extends Component {
                                             {{ $user->orangTua->istri->name }}
                                             {{ $user->orangTua->istri->wafat ? '(Alm)' : '' }}
                                         </a>
+                                        @can('update', $user)
+                                            <flux:button icon="x-mark" size="xs" variant="ghost" color="red"
+                                                class="cursor-pointer"
+                                                wire:click="removeHubungan('orangtua')"
+                                                wire:confirm="{{ __('Remove parent relationship? This will also clear father and mother.') }}"
+                                                title="{{ __('Remove') }}" />
+                                        @endcan
                                     </div>
                                 @endif
 
@@ -336,6 +396,13 @@ new class extends Component {
                                             class="font-medium text-blue-600 hover:underline">
                                             {{ $spouse->name }} {{ $spouse->wafat ? '(Alm)' : '' }}
                                         </a>
+                                        @can('update', $user)
+                                            <flux:button icon="x-mark" size="xs" variant="ghost" color="red"
+                                                class="cursor-pointer"
+                                                wire:click="removePernikahan('{{ $spouse->id }}')"
+                                                wire:confirm="{{ __('Remove this marriage relationship?') }}"
+                                                title="{{ __('Remove') }}" />
+                                        @endcan
                                     </div>
                                 @endforeach
 
