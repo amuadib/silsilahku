@@ -217,7 +217,7 @@ new class extends Component {
                 <flux:subheading size="lg" class="mt-1">{{ __('Edit') }}</flux:subheading>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <flux:button color="blue" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="primary">
+                <flux:button color="zinc" href="{{ route('pengguna.show', $user->id) }}" wire:navigate variant="outline">
                     {{ __('Detail') }}
                 </flux:button>
             </div>
@@ -228,8 +228,8 @@ new class extends Component {
         <div class="mt-4 flex flex-col md:flex-row gap-8">
             {{-- Profile Section --}}
             <div class="flex-1 space-y-6">
-                <div class="border dark:border-zinc-700 rounded-lg overflow-hidden bg-white dark:bg-zinc-800 shadow-sm">
-                    <flux:heading size="xl" class="border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">{{ __('Profile') }}</flux:heading>
+                <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <flux:heading size="xl" class="border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">{{ __('Profile') }}</flux:heading>
                     
                     <div class="p-6 space-y-4">
                         <x-profile-photo :user="$user" :newFoto="$newFoto" />
@@ -290,7 +290,7 @@ new class extends Component {
                         </flux:field>
                     </div>
 
-                    <div class="p-4 bg-gray-50 dark:bg-zinc-800/50 border-t dark:border-zinc-700 flex justify-end">
+                    <div class="p-4 border-t border-zinc-100 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50 flex justify-end">
                         <flux:button wire:click="update" color="yellow" variant="primary" style="cursor: pointer;">{{ __('Update') }}</flux:button>
                     </div>
                 </div>
@@ -300,8 +300,8 @@ new class extends Component {
             <div class="w-full md:w-1/3 space-y-6">
                 {{-- Account Section --}}
                 @can('update', $user)
-                    <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
-                        <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
+                    <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                        <div class="flex items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                             <flux:heading size="lg">
                                 {{ __('Account') }}
                                 @if($accountIsActive)
@@ -340,8 +340,8 @@ new class extends Component {
 
                 {{-- Death Section --}}
                 @if($user->wafat)
-                <div class="border rounded-lg overflow-hidden bg-white shadow-sm">
-                    <div class="flex items-center justify-between border-b dark:border-zinc-700 p-4 bg-gray-50 dark:bg-zinc-800/50">
+                <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                    <div class="flex items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                         <flux:heading size="lg">{{ __('Death') }}</flux:heading>
                         @if (!$showFormKematian)
                             <flux:button size="xs" wire:click="$set('showFormKematian', true)" variant="subtle">{{ __('Edit') }}</flux:button>

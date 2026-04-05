@@ -161,7 +161,7 @@ new class extends Component {
         <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
             {{-- Profile Card --}}
             <div class="space-y-6 lg:col-span-1">
-                <div class="overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-zinc-800">
+                <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                     <div
                         class="flex flex-col items-center border-b bg-gray-50 p-6 dark:border-zinc-700 dark:bg-zinc-800/50">
                         <x-profile-photo :user="$user" :showUpload="false" />
@@ -231,9 +231,9 @@ new class extends Component {
             {{-- Family Section --}}
             <div class="space-y-8 lg:col-span-2">
                 {{-- Relationships --}}
-                <div class="overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-zinc-800">
+                <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                     <flux:heading size="xl"
-                        class="border-b bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-700 dark:from-zinc-800/60 dark:to-zinc-800/40">
+                        class="border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                         {{ __('Family Relationships') }}
                     </flux:heading>
 
@@ -360,9 +360,9 @@ new class extends Component {
                 </div>
 
                 {{-- Children --}}
-                <div class="overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-zinc-800">
+                <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                     <div
-                        class="flex items-center justify-between border-b bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+                        class="flex items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                         <flux:heading size="xl">{{ __('Children') }}</flux:heading>
                         @can('update', $user)
                             <flux:button size="xs" wire:click="setHubungan('anak')" color="green" icon="plus"
@@ -427,9 +427,9 @@ new class extends Component {
 
                 {{-- Siblings --}}
                 @if ($user->orangTua && $user->orangTua->anak->count() > 1)
-                    <div class="overflow-hidden rounded-lg border bg-white shadow-sm dark:bg-zinc-800">
+                    <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
                         <flux:heading size="xl"
-                            class="border-b bg-gray-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+                            class="border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                             {{ __('Siblings') }}</flux:heading>
                         <div class="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
                             @foreach ($user->orangTua->anak as $saudara)
