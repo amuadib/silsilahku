@@ -203,15 +203,3 @@ new class extends Component {
         }
     </style>
 @endpush
-
-@push('scripts')
-    <script>
-        window.addEventListener('beforeprint', () => {
-            window.wasDark = document.documentElement.classList.contains('dark');
-            document.documentElement.classList.remove('dark');
-        });
-        window.addEventListener('afterprint', () => {
-            if (window.wasDark) document.documentElement.classList.add('dark');
-        });
-    </script>
-@endpush
