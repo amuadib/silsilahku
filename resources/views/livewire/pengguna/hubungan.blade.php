@@ -127,7 +127,7 @@ new class extends Component {
 
         {{-- Search Form --}}
         <div
-            class="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            class="mt-6 rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <div
                 class="border-b border-zinc-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:border-zinc-800 dark:from-zinc-800/60 dark:to-zinc-800/40">
                 <div class="flex items-center gap-3">
