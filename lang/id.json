@@ -41,7 +41,8 @@
     "Add Wife" : "Tambah Istri",
     "Add Husband" : "Tambah Suami",
     "Children" : "Anak-anak",
-    "Siblings" : "Saudara",
+    "Siblings" : "Saudara-saudara",
+    "Sibling" : "Saudara",
     "Death" : "Kematian",
     "Memorial" : "Makam",
     "Memorial Address" : "Alamat Makam",
@@ -189,5 +190,7 @@
     "Remove father relationship?": "Hapus hubungan ayah?",
     "Remove mother relationship?": "Hapus hubungan ibu?",
     "Remove parent relationship? This will also clear father and mother.": "Hapus hubungan orang tua? Ini juga akan menghapus data ayah dan ibu.",
-    "Remove this marriage relationship?": "Hapus hubungan pernikahan ini?"
+    "Remove this marriage relationship?": "Hapus hubungan pernikahan ini?",
+    "Relationship Type": "Jenis Hubungan",
+    "Add Relationship": "Tambah Hubungan"
 }

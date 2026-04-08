@@ -2,12 +2,33 @@
 
 use Livewire\Volt\Component;
 use App\Models\User;
+use App\Models\Pernikahan;
+use App\Traits\HasToast;
+use Illuminate\Support\Facades\Auth;
 
 new class extends Component {
+    use HasToast;
+
     public User $user;
+    public ?User $targetUser = null;
     public array $treeData = [];
     public array $deceasedList = [];
     public int $totalMember = 0;
+
+    // Form properties
+    public ?string $activeForm = null;
+    public $userLakiLaki;
+    public $userPerempuan;
+    public $userFromSelection;
+    public $userFromInput;
+    public $userWithoutParentList;
+    public $name;
+    public $jenis_kelamin;
+    public $pasanganPernikahan;
+    public $pasanganPernikahanUser;
+    public $ortu_id;
+    public $anak_ke;
+    public $userExist = false;
 
     public function mount(string $id)
     {
@@ -87,6 +108,130 @@ new class extends Component {
             'jenis_kelamin' => $user->jenis_kelamin,
             'marriages' => $marriages,
         ];
+    }
+
+    public function loadFormData()
+    {
+        $this->userLakiLaki = User::where('jenis_kelamin', '1')->orderBy('name')->get();
+        $this->userPerempuan = User::where('jenis_kelamin', '2')->orderBy('name')->get();
+        $this->userWithoutParentList = User::whereNull('ortu_id')->orderBy('name')->get();
+
+        $this->pasanganPernikahan = Pernikahan::with('suami', 'istri')->get()->mapWithKeys(fn($p) => [$p->id => "{$p->suami->name} & {$p->istri->name}"])->toArray();
+
+        if ($this->targetUser) {
+            $this->pasanganPernikahanUser = Pernikahan::where('suami_id', $this->targetUser->id)
+                ->orWhere('istri_id', $this->targetUser->id)
+                ->with('suami', 'istri')
+                ->get()
+                ->mapWithKeys(fn($p) => [$p->id => "{$p->suami->name} & {$p->istri->name}"])
+                ->toArray();
+        }
+    }
+
+    public function openAddHubunganModal($userId)
+    {
+        $this->targetUser = User::find($userId);
+        $this->loadFormData();
+        $this->modal('add-hubungan-modal')->show();
+    }
+
+    public function setHubungan($hubungan)
+    {
+        $this->activeForm = $hubungan;
+    }
+
+    public function save()
+    {
+        $this->authorize('update', $this->targetUser);
+
+        $id = $this->resolveTargetUserId();
+
+        match ($this->activeForm) {
+            'ayah' => $this->targetUser->update(['ayah_id' => $id]),
+            'ibu' => $this->targetUser->update(['ibu_id' => $id]),
+            'suami' => Pernikahan::create(['suami_id' => $id, 'istri_id' => $this->targetUser->id, 'manager_id' => Auth::id()]),
+            'istri' => Pernikahan::create(['suami_id' => $this->targetUser->id, 'istri_id' => $id, 'manager_id' => Auth::id()]),
+            'orangtua' => $this->targetUser->update(['ortu_id' => $this->ortu_id]),
+            'anak' => $this->handleSaveAnak($id),
+            'saudara' => $this->handleSaveSaudara($id),
+            default => null,
+        };
+
+        $this->resetAll();
+        $this->modal('add-hubungan-modal')->close();
+        $this->toastSuccess(__('Data saved successfully.'));
+
+        // Refresh tree data
+        $visited = [];
+        $this->totalMember = 0;
+        $this->treeData = $this->buildFamilyTree($this->user, $visited) ?? [];
+    }
+
+    protected function resolveTargetUserId()
+    {
+        if ($this->userFromSelection) {
+            return $this->userFromSelection;
+        }
+
+        if ($this->userFromInput) {
+            return User::create([
+                'name' => $this->userFromInput,
+                'jenis_kelamin' => in_array($this->activeForm, ['ayah', 'suami']) ? '1' : '2',
+                'manager_id' => Auth::id(),
+            ])->id;
+        }
+
+        return null;
+    }
+
+    protected function handleSaveAnak($id)
+    {
+        $pernikahan = Pernikahan::findOrFail($this->ortu_id);
+
+        if (!$id) {
+            $id = User::create([
+                'name' => $this->name,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'manager_id' => Auth::id(),
+            ])->id;
+        }
+
+        User::find($id)->update([
+            'ortu_id' => $this->ortu_id,
+            'ayah_id' => $pernikahan->suami_id,
+            'ibu_id' => $pernikahan->istri_id,
+            'anak_ke' => $this->anak_ke,
+        ]);
+    }
+
+    protected function handleSaveSaudara($id)
+    {
+        if (!$this->targetUser->ortu_id) {
+            $this->toastError(__('Target user does not have parents set. Please set parents first.'));
+            return;
+        }
+
+        if (!$id) {
+            $id = User::create([
+                'name' => $this->name,
+                'jenis_kelamin' => $this->jenis_kelamin,
+                'manager_id' => Auth::id(),
+            ])->id;
+        }
+
+        $pernikahan = Pernikahan::find($this->targetUser->ortu_id);
+
+        User::find($id)->update([
+            'ortu_id' => $this->targetUser->ortu_id,
+            'ayah_id' => $this->targetUser->ayah_id,
+            'ibu_id' => $this->targetUser->ibu_id,
+            'anak_ke' => $this->anak_ke,
+        ]);
+    }
+
+    private function resetAll()
+    {
+        $this->reset(['activeForm', 'userFromSelection', 'userFromInput', 'name', 'jenis_kelamin', 'anak_ke', 'ortu_id', 'userExist']);
     }
 };
 ?>
@@ -170,6 +315,67 @@ new class extends Component {
             </div>
         </div>
     @endif
+
+    <flux:modal name="add-hubungan-modal" class="min-w-[500px]">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Tambah Hubungan Keluarga</flux:heading>
+                <flux:subheading>Menambahkan hubungan untuk <span class="font-bold text-zinc-800 dark:text-white">{{ $targetUser?->name }}</span></flux:subheading>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300">{{ __('Relationship Type') }}</label>
+                <div class="flex flex-wrap gap-2">
+                    @php
+                        $hubungans = [
+                            'ayah' => __('Father'),
+                            'ibu' => __('Mother'),
+                            'saudara' => __('Sibling'),
+                            'anak' => __('Child'),
+                            'suami' => __('Husband'),
+                            'istri' => __('Wife'),
+                        ];
+                        // Filter based on gender
+                        if ($targetUser?->jenis_kelamin == '1') unset($hubungans['suami']);
+                        if ($targetUser?->jenis_kelamin == '2') unset($hubungans['istri']);
+                    @endphp
+
+                    @foreach($hubungans as $key => $label)
+                        <flux:button
+                            size="sm"
+                            wire:click="setHubungan('{{ $key }}')"
+                            :variant="$activeForm === $key ? 'primary' : 'outline'"
+                            class="cursor-pointer"
+                        >
+                            {{ $label }}
+                        </flux:button>
+                    @endforeach
+                </div>
+            </div>
+
+            @if ($activeForm)
+                <div class="mt-4 border-t pt-4 dark:border-zinc-700" wire:key="hubungan-form-{{ $activeForm }}">
+                    @php
+                        $userListToPass = [];
+                        if ($activeForm === 'ayah' || $activeForm === 'suami') {
+                            $userListToPass = $userLakiLaki;
+                        } elseif ($activeForm === 'ibu' || $activeForm === 'istri') {
+                            $userListToPass = $userPerempuan;
+                        } elseif ($activeForm === 'anak') {
+                            $userListToPass = $pasanganPernikahanUser;
+                        } elseif ($activeForm === 'saudara') {
+                            $userListToPass = $pasanganPernikahan;
+                            // If target user has parents, we might want to default to them
+                            if ($targetUser->ortu_id && !$ortu_id) {
+                                $this->ortu_id = $targetUser->ortu_id;
+                            }
+                        }
+                    @endphp
+                    @include('livewire.pengguna.form', ['userList' => $userListToPass])
+                </div>
+            @endif
+        </div>
+    </flux:modal>
     </div>
 </section>
 

@@ -14,6 +14,13 @@
             @if (!empty($node['wafat']))
                 <span class="ml-0.5 text-xs font-normal text-red-500">(Alm)</span>
             @endif
+
+            @auth
+                @can('update', App\Models\User::find($node['id']))
+                    <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                        wire:click="openAddHubunganModal('{{ $node['id'] }}')" title="{{ __('Add Relationship') }}" />
+                @endcan
+            @endauth
         </span>
     </div>
 @else
@@ -66,8 +73,23 @@
                         @if (!empty($marriage['spouse']['wafat']))
                             <span class="ml-0.5 text-xs font-normal text-red-500">(Alm)</span>
                         @endif
+
+                        @auth
+                            @can('update', App\Models\User::find($marriage['spouse']['id']))
+                                <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                                    wire:click="openAddHubunganModal('{{ $marriage['spouse']['id'] }}')"
+                                    title="{{ __('Add Relationship') }}" />
+                            @endcan
+                        @endauth
                     @endif
                 </span>
+
+                @auth
+                    @can('update', App\Models\User::find($node['id']))
+                        <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                            wire:click="openAddHubunganModal('{{ $node['id'] }}')" title="{{ __('Add Relationship') }}" />
+                    @endcan
+                @endauth
             </div>
 
             @if ($hasChildren)

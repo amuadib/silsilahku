@@ -1,5 +1,5 @@
 <div>
-    @if ($activeForm === 'anak')
+    @if (in_array($activeForm, ['anak', 'saudara']))
         <div class="px-4 py-2">
             @if (!$userExist)
                 <flux:button wire:click="$set('userExist', true)" class="mb-2 cursor-pointer" size="sm" color="green"
