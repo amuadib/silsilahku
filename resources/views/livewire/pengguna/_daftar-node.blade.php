@@ -4,19 +4,20 @@
 
 @if ($marriageCount === 0)
     <div class="mb-2 flex items-start">
-        <span class="font-semibold text-indigo-500 dark:text-indigo-400 mr-2 shrink-0">{{ $prefix }}.</span>
+        <span class="font-semibold text-indigo-500 dark:text-indigo-400 mr-2 shrink-0 print:text-black print:dark:text-black print:font-normal">{{ $prefix }}.</span>
         <span class="text-[15px] font-medium leading-relaxed">
             <a href="{{ route('pengguna.show', $node['id']) }}" wire:navigate
                 class="text-zinc-800 hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                 {{ $node['name'] }}
+                @if($node['jenis_kelamin'] == '1') (L) @else (P) @endif
             </a>
             @if (!empty($node['wafat']))
-                <span class="ml-0.5 text-xs font-normal text-red-500">(Alm)</span>
+                <span class="ml-0.5 text-xs font-normal text-red-500 print:text-black">(Alm)</span>
             @endif
 
             @auth
                 @can('update', App\Models\User::find($node['id']))
-                    <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                    <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer print:hidden"
                         wire:click="openAddHubunganModal('{{ $node['id'] }}')" title="{{ __('Add Relationship') }}" />
                 @endcan
             @endauth
@@ -33,35 +34,36 @@
         @endphp
 
         <div class="mb-2 flex items-start">
-            <span class="font-semibold text-indigo-500 dark:text-indigo-400 mr-2 shrink-0">{{ $marriagePrefix }}.</span>
+            <span class="font-semibold text-indigo-500 dark:text-indigo-400 mr-2 shrink-0 print:text-black print:dark:text-black print:font-normal">{{ $marriagePrefix }}.</span>
             <span class="text-[15px] font-medium leading-relaxed">
                 <a href="{{ route('pengguna.show', $node['id']) }}" wire:navigate
                     class="text-zinc-800 hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                     {{ $node['name'] }}
+                    @if($node['jenis_kelamin'] == '1') (L) @else (P) @endif
                 </a>
                 @if (!empty($node['wafat']))
-                    <span class="ml-0.5 text-xs font-normal text-red-500">(Alm)</span>
+                    <span class="ml-0.5 text-xs font-normal text-red-500 print:text-black">(Alm)</span>
                 @endif
                 @auth
                     @can('update', App\Models\User::find($node['id']))
-                        <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                        <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer print:hidden"
                             wire:click="openAddHubunganModal('{{ $node['id'] }}')" title="{{ __('Add Relationship') }}" />
                     @endcan
                 @endauth
 
                 @if (!empty($marriage['spouse']))
-                    <span class="mx-0.5 font-normal text-zinc-500"> &amp; </span>
+                    <span class="mx-0.5 font-normal"> &amp; </span>
                     <a href="{{ route('pengguna.show', $marriage['spouse']['id']) }}" wire:navigate
                         class="text-zinc-800 hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
-                        {{ $marriage['spouse']['name'] }}
+                        {{ $marriage['spouse']['name'] }} @if($marriage['spouse']['jenis_kelamin'] == '1') (L) @else (P) @endif
                     </a>
                     @if (!empty($marriage['spouse']['wafat']))
-                        <span class="ml-0.5 text-xs font-normal text-red-500">(Alm)</span>
+                        <span class="ml-0.5 text-xs font-normal text-red-500 print:text-black">(Alm)</span>
                     @endif
 
                     @auth
                         @can('update', App\Models\User::find($marriage['spouse']['id']))
-                            <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer"
+                            <flux:button icon="plus" size="xs" variant="ghost" class="ml-1 cursor-pointer print:hidden"
                                 wire:click="openAddHubunganModal('{{ $marriage['spouse']['id'] }}')"
                                 title="{{ __('Add Relationship') }}" />
                         @endcan

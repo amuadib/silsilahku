@@ -301,6 +301,7 @@ new class extends Component {
                                 <a href="{{ route('pengguna.show', $deceased['id']) }}" wire:navigate
                                     class="block truncate text-sm font-medium text-zinc-900 hover:text-blue-600 hover:underline dark:text-zinc-100 dark:hover:text-blue-400">
                                     {{ $deceased['name'] }}
+                                    @if($deceased['jenis_kelamin'] == '1') (L) @else (P) @endif
                                 </a>
                                 <div class="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
                                     Wafat:
