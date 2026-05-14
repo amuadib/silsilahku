@@ -83,3 +83,7 @@ npm run dev
 Aplikasi ini merupakan perangkat lunak bebas. Anda dapat menggunakan, menyalin, memodifikasi, dan mendistribusikan ulang kode ini sesuai dengan lisensi MIT.
 
 ---
+
+## Ko-Fi
+
+Buy me a coffee (or tea, or snacks) :) [Ko-Fi](https://ko-fi.com/amuadib)
