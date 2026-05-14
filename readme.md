@@ -84,6 +84,6 @@ Aplikasi ini merupakan perangkat lunak bebas. Anda dapat menggunakan, menyalin, 
 
 ---
 
-## Ko-Fi
+## Sponsor
 
 Buy me a coffee (or tea, or snacks) :) [Ko-Fi](https://ko-fi.com/amuadib)
