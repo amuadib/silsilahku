@@ -163,11 +163,11 @@ new class extends Component {
                                             <flux:button size="sm" variant="primary" color="yellow" icon="pencil-square"
                                                 href="{{ route('pengguna.edit', $u->id) }}" wire:navigate />
                                         @endcan
-                                        <flux:button size="sm" variant="primary" color="blue" icon="share"
-                                            href="{{ route('pengguna.pohon-v2', $u->id) }}" wire:navigate
+                        <flux:button size="sm" variant="primary" color="blue" icon="share"
+                                            href="{{ route('pengguna.bagan', $u->id) }}" wire:navigate
                                             title="{{ __('View Tree') }}" />
                                         <flux:button size="sm" variant="primary" color="green" icon="list-bullet"
-                                            href="{{ route('pengguna.daftar', $u->id) }}" wire:navigate
+                                            href="{{ route('pengguna.daftar-v2', $u->id) }}" wire:navigate
                                             title="{{ __('List of Family members') }}" />
                                         @can('delete', $u)
                                             <flux:button size="sm" variant="primary" color="red" icon="trash" class="cursor-pointer"

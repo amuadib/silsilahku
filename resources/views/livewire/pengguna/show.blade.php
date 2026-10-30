@@ -170,14 +170,18 @@ new class extends Component {
                 <flux:subheading size="lg" class="mt-1">{{ __('Profile Detail') }}</flux:subheading>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
+                <flux:button color="zinc" href="{{ route('pengguna.daftar-v2', $user->id) }}" wire:navigate
                     variant="outline" icon="users">
                     {{ __('List of Family members') }}
                 </flux:button>
-                <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate
+                <flux:button color="zinc" href="{{ route('pengguna.bagan', $user->id) }}" wire:navigate
+                    variant="outline" icon="table-cells">
+                    {{ __('Bagan Keluarga') }}
+                </flux:button>
+                {{-- <flux:button color="zinc" href="{{ route('pengguna.pohon-v2', $user->id) }}" wire:navigate
                     variant="outline" icon="share">
                     {{ __('Family Tree') }}
-                </flux:button>
+                </flux:button> --}}
                 <flux:button color="cyan" href="{{ route('pengguna.hubungan') }}" wire:navigate variant="outline"
                     icon="arrows-right-left">
                     {{ __('Find Relationship') }}

@@ -3,11 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-
-Volt::route('pengguna/{id}/pohon-v2', 'pengguna.pohon-v2')->name('pengguna.pohon-v2');
-Volt::route('pengguna/{id}/pohon', 'pengguna.pohon')->name('pengguna.pohon');
-Volt::route('pengguna/{id}/daftar', 'pengguna.daftar')->name('pengguna.daftar');
-Volt::route('pengguna/{id}/daftar-collapse', 'pengguna.daftar-collapse')->name('pengguna.daftar-collapse');
+// Volt::route('pengguna/{id}/pohon-v2', 'pengguna.pohon-v2')->name('pengguna.pohon-v2');
+// Volt::route('pengguna/{id}/pohon-v3', 'pengguna.pohon-v3')->name('pengguna.pohon-v3');
+Volt::route('pengguna/{id}/bagan', 'pengguna.bagan')->name('pengguna.bagan');
+// Volt::route('pengguna/{id}/pohon', 'pengguna.pohon')->name('pengguna.pohon');
+// Volt::route('pengguna/{id}/daftar', 'pengguna.daftar')->name('pengguna.daftar');
+Volt::route('pengguna/{id}/daftar-v2', 'pengguna.daftar-v2')->name('pengguna.daftar-v2');
+// Volt::route('pengguna/{id}/daftar-collapse', 'pengguna.daftar-collapse')->name('pengguna.daftar-collapse');
 Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('/', 'dashboard')->name('dashboard');
     Volt::route('pengguna/hubungan', 'pengguna.hubungan')->name('pengguna.hubungan');
@@ -20,4 +22,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/settings.php';
-

@@ -17,6 +17,8 @@ new class extends Component {
 
     public $user;
     public $name;
+    public $gelar_depan;
+    public $gelar_belakang;
     public $newFoto;
     public $jenis_kelamin;
     public $tanggal_lahir;
@@ -40,7 +42,9 @@ new class extends Component {
     public function mount($id)
     {
         $this->user = User::findOrFail($id);
-        $this->name = $this->user->name;
+        $this->name = $this->user->getRawOriginal('name');
+        $this->gelar_depan = $this->user->gelar_depan;
+        $this->gelar_belakang = $this->user->gelar_belakang;
         $this->jenis_kelamin = $this->user->jenis_kelamin;
         $this->tanggal_lahir = $this->user->tanggal_lahir?->format('Y-m-d');
         $this->tanggal_wafat = $this->user->tanggal_wafat?->format('Y-m-d');
@@ -101,7 +105,9 @@ new class extends Component {
     public function update()
     {
         $validated = $this->validate([
+            'gelar_depan' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
+            'gelar_belakang' => 'nullable|string|max:100',
             'newFoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'jenis_kelamin' => 'required|in:1,2',
             'tanggal_lahir' => 'nullable|date',
@@ -234,9 +240,19 @@ new class extends Component {
                     <div class="p-6 space-y-4">
                         <x-profile-photo :user="$user" :newFoto="$newFoto" />
 
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-1">
+                                <flux:input wire:model="gelar_depan" :label="__('Gelar Depan')" placeholder="Contoh: KH., H., Hj." />
+                            </div>
+                            <div class="md:col-span-2">
+                                <flux:input wire:model="name" :label="__('Name')" required autofocus />
+                            </div>
+                            <div class="md:col-span-1">
+                                <flux:input wire:model="gelar_belakang" :label="__('Gelar Belakang')" placeholder="Contoh: Lc., M.A." />
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <flux:input wire:model="name" :label="__('Name')" required autofocus />
-                            
                             <flux:field>
                                 <flux:label>{{ __('Gender') }}</flux:label>
                                 <div class="flex gap-4 mt-2">

@@ -171,7 +171,7 @@ new class extends Component {
                     class="cursor-pointer" variant="outline">
                     {{ __('V1') }}
                 </flux:button>
-                <flux:button color="zinc" href="{{ route('pengguna.daftar', $user->id) }}" wire:navigate
+                <flux:button color="zinc" href="{{ route('pengguna.daftar-v2', $user->id) }}" wire:navigate
                     class="cursor-pointer" variant="outline" icon="users">
                     {{ __('List') }}
                 </flux:button>

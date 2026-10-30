@@ -31,21 +31,48 @@
                 <flux:separator vertical variant="subtle" class="my-2" /> --}}
 
                 <div x-data="{ 
-                    appearance: localStorage.getItem('appearance') || 'system',
+                    appearance: localStorage.getItem('appearance') || localStorage.getItem('flux.appearance') || 'system',
                     dark: false,
+                    wasDarkBeforePrint: false,
                     init() {
-                        this.dark = this.appearance === 'dark' || (this.appearance === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                        this.update();
+                        if (this.appearance === 'system') {
+                            this.dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        } else {
+                            this.dark = this.appearance === 'dark';
+                        }
+                        this.apply();
+
+                        // Hindari tema berubah jadi dark saat event print browser terpicu
+                        window.addEventListener('beforeprint', () => {
+                            this.wasDarkBeforePrint = document.documentElement.classList.contains('dark');
+                            document.documentElement.classList.remove('dark');
+                        });
+
+                        window.addEventListener('afterprint', () => {
+                            if (this.wasDarkBeforePrint) {
+                                document.documentElement.classList.add('dark');
+                            } else {
+                                document.documentElement.classList.remove('dark');
+                            }
+                        });
                     },
                     toggle() {
-                        this.appearance = this.dark ? 'light' : 'dark';
                         this.dark = !this.dark;
+                        this.appearance = this.dark ? 'dark' : 'light';
                         localStorage.setItem('appearance', this.appearance);
-                        this.update();
+                        localStorage.setItem('flux.appearance', this.appearance);
+                        if (window.Flux && typeof window.Flux.applyAppearance === 'function') {
+                            window.Flux.applyAppearance(this.appearance);
+                        }
+                        this.apply();
                     },
-                    update() {
-                        if (this.dark) document.documentElement.classList.add('dark');
-                        else document.documentElement.classList.remove('dark');
+                    apply() {
+                        if (this.dark) {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                        localStorage.setItem('flux.appearance', this.appearance);
                     }
                 }" class="flex items-center">
                     <flux:navbar.item x-show="!dark" icon="moon" x-on:click="toggle" variant="subtle" class="!h-10 [&>div>svg]:size-5 cursor-pointer" />

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Concerns\LogsActivity;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -30,6 +31,8 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'gelar_depan',
+        'gelar_belakang',
         'email',
         'password',
         'jenis_kelamin',
@@ -44,9 +47,29 @@ class User extends Authenticatable
         'address_id',
         'memorial_address_id',
         'hp',
-        'foto',
         'manager_id'
     ];
+
+    /**
+     * Boot model events.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (!empty($user->name) && empty($user->gelar_depan)) {
+                if (preg_match('/^(KH\.|K\.H\.|KH)\s+(.+)$/i', $user->name, $m)) {
+                    $user->gelar_depan = 'KH.';
+                    $user->name = trim($m[2]);
+                } elseif (preg_match('/^(Hj\.|Hj)\s+(.+)$/i', $user->name, $m)) {
+                    $user->gelar_depan = 'Hj.';
+                    $user->name = trim($m[2]);
+                } elseif (preg_match('/^(H\.|H)\s+(.+)$/i', $user->name, $m)) {
+                    $user->gelar_depan = 'H.';
+                    $user->name = trim($m[2]);
+                }
+            }
+        });
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -77,11 +100,59 @@ class User extends Authenticatable
     }
 
     /**
+     * Accessor & Mutator untuk atribut name.
+     * Otomatis menyertakan gelar_depan dan gelar_belakang saat dipanggil ($user->name),
+     * namun kolom database 'name' tetap menyimpan nama asli tanpa gelar sehingga
+     * pengurutan (sorting ->orderBy('name')) tetap berdasarkan nama asli.
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value, array $attributes) {
+                $rawName = $value ?? ($attributes['name'] ?? '');
+                $gelarDepan = $attributes['gelar_depan'] ?? $this->gelar_depan ?? null;
+                $gelarBelakang = $attributes['gelar_belakang'] ?? $this->gelar_belakang ?? null;
+
+                $parts = [];
+                if (!empty($gelarDepan)) {
+                    $parts[] = trim($gelarDepan);
+                }
+                if (!empty($rawName)) {
+                    $parts[] = trim($rawName);
+                }
+
+                $fullName = implode(' ', $parts);
+
+                if (!empty($gelarBelakang)) {
+                    $gb = trim($gelarBelakang);
+                    if (str_starts_with($gb, ',')) {
+                        $fullName .= $gb;
+                    } else {
+                        $fullName .= ($fullName !== '' ? ', ' : '') . $gb;
+                    }
+                }
+
+                return $fullName !== '' ? $fullName : $rawName;
+            },
+            set: fn (?string $value) => $value,
+        );
+    }
+
+    /**
+     * Ambil nama asli tanpa gelar.
+     */
+    public function getNamaAsliAttribute(): string
+    {
+        return $this->attributes['name'] ?? '';
+    }
+
+    /**
      * Get the user's initials
      */
     public function initials(): string
     {
-        return Str::of($this->name)
+        $baseName = $this->attributes['name'] ?? $this->name;
+        return Str::of($baseName)
             ->explode(' ')
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
