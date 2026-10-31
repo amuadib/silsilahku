@@ -20,7 +20,37 @@ new class extends Component {
 
     public function mount(string $id)
     {
+        $this->loadUserData($id);
+    }
+
+    public function switchUser(string $id, bool $pushHistory = true): void
+    {
+        $this->loadUserData($id);
+
+        if ($pushHistory) {
+            $url = route('pengguna.bagan', $id);
+            $safeName = addslashes($this->user->name);
+            $this->js("window.history.pushState({ userId: '{$id}' }, '', '{$url}'); document.title = 'Bani {$safeName}';");
+        }
+
+        $this->dispatch('user-switched');
+    }
+
+    private function loadUserData(string $id): void
+    {
         $this->user = User::findOrFail($id);
+        $this->ayah = null;
+        $this->ibu = null;
+        $this->kakekAyah = null;
+        $this->nenekAyah = null;
+        $this->kakekIbu = null;
+        $this->nenekIbu = null;
+        $this->spouses = [];
+        $this->childrenData = [];
+        $this->siblingsData = [];
+        $this->deceasedList = [];
+        $this->totalMember = 0;
+
         $this->loadFamilyGrid();
         $this->calculateTotalMembersAndDeceased();
     }
@@ -261,7 +291,9 @@ new class extends Component {
         </div>
 
         {{-- ── Main Card (Identik dengan Card di daftar-v2) ────────────── --}}
-        <div x-data="{
+        <div id="main-family-card"
+             wire:key="main-family-card"
+             x-data="{
                 isFullscreen: false,
                 toggleFullscreen() {
                     const isFs = document.fullscreenElement || document.webkitFullscreenElement;
@@ -287,11 +319,28 @@ new class extends Component {
                 };
                 document.addEventListener('fullscreenchange', onFsChange);
                 document.addEventListener('webkitfullscreenchange', onFsChange);
+
+                window.addEventListener('popstate', (e) => {
+                    const match = window.location.pathname.match(/\/pengguna\/(?:bagan|pohon-v3)\/([^\/]+)/);
+                    if (match && match[1]) {
+                        $wire.switchUser(match[1], false);
+                    }
+                });
              "
+             @user-switched.window="$el.scrollTop = 0"
              class="main-card-fullscreen overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 print:border-none print:shadow-none">
 
             {{-- Card Header dengan Gradient --}}
-            <div class="card-header-sticky border-b border-zinc-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 px-6 py-4 dark:border-zinc-800 dark:from-indigo-900/20 dark:via-purple-900/10 dark:to-blue-900/20 print:hidden">
+            <div class="card-header-sticky relative border-b border-zinc-100 bg-gradient-to-r from-indigo-50 via-purple-50 to-blue-50 px-6 py-4 dark:border-zinc-800 dark:from-indigo-900/20 dark:via-purple-900/10 dark:to-blue-900/20 print:hidden">
+                {{-- Floating Loading Indicator di Tengah Atas (Tidak Menggeser Layout) --}}
+                <div wire:loading.flex class="pointer-events-none absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-indigo-200/90 bg-white/95 px-3.5 py-1 text-xs font-medium text-indigo-700 shadow-sm backdrop-blur-md dark:border-indigo-800/80 dark:bg-zinc-800/95 dark:text-indigo-300">
+                    <svg class="h-3.5 w-3.5 animate-spin text-indigo-600 dark:text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span>Memuat...</span>
+                </div>
+
                 <div class="flex items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 shadow-sm dark:bg-zinc-800/70">
@@ -323,8 +372,85 @@ new class extends Component {
                 </div>
             </div>
 
+            {{-- ── Quick Navigation (Node Diatasnya / Dibawahnya) ── --}}
+            @if ($ayah || $ibu || !empty($childrenData))
+                <div class="border-b border-zinc-100 bg-zinc-50/70 px-4 py-2.5 sm:px-6 dark:border-zinc-800 dark:bg-zinc-800/40 print:hidden">
+                    <div class="flex flex-col gap-2">
+
+                        {{-- Node Diatasnya (Ayah / Ibu) --}}
+                        @if ($ayah || $ibu)
+                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <span class="inline-flex items-center gap-1 font-semibold text-zinc-500 dark:text-zinc-400">
+                                    <svg class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                                    </svg>
+                                    <span>{{ __('Ke Orang Tua') }}:</span>
+                                </span>
+
+                                @if ($ayah)
+                                    <a href="{{ route('pengguna.bagan', $ayah->id) }}"
+                                       wire:click.prevent="switchUser('{{ $ayah->id }}')"
+                                       class="inline-flex items-center gap-1.5 rounded-lg border border-blue-200/90 bg-white px-2.5 py-1 text-xs font-medium text-blue-700 shadow-2xs transition-all hover:border-blue-400 hover:bg-blue-50 dark:border-blue-800/70 dark:bg-zinc-800 dark:text-blue-300 dark:hover:bg-blue-950/40">
+                                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                        <span>{{ __('Ayah') }}: <strong>{{ $ayah->name }}</strong></span>
+                                        @if ($ayah->wafat)
+                                            <span class="rounded bg-red-100 px-1 py-0.5 text-[9px] font-semibold text-red-600 dark:bg-red-900/50 dark:text-red-400">Alm</span>
+                                        @endif
+                                    </a>
+                                @endif
+
+                                @if ($ibu)
+                                    <a href="{{ route('pengguna.bagan', $ibu->id) }}"
+                                       wire:click.prevent="switchUser('{{ $ibu->id }}')"
+                                       class="inline-flex items-center gap-1.5 rounded-lg border border-pink-200/90 bg-white px-2.5 py-1 text-xs font-medium text-pink-700 shadow-2xs transition-all hover:border-pink-400 hover:bg-pink-50 dark:border-pink-800/70 dark:bg-zinc-800 dark:text-pink-300 dark:hover:bg-pink-950/40">
+                                        <span class="inline-block h-1.5 w-1.5 rounded-full bg-pink-500"></span>
+                                        <span>{{ __('Ibu') }}: <strong>{{ $ibu->name }}</strong></span>
+                                        @if ($ibu->wafat)
+                                            <span class="rounded bg-red-100 px-1 py-0.5 text-[9px] font-semibold text-red-600 dark:bg-red-900/50 dark:text-red-400">Alm</span>
+                                        @endif
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- Node Dibawahnya (Anak-anak) --}}
+                        @if (!empty($childrenData))
+                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <span class="inline-flex items-center gap-1 font-semibold text-zinc-500 dark:text-zinc-400">
+                                    <svg class="h-3.5 w-3.5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                    </svg>
+                                    <span>{{ __('Ke Anak') }} ({{ count($childrenData) }}):</span>
+                                </span>
+
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    @foreach ($childrenData as $index => $item)
+                                        @php
+                                            $child = $item['child'];
+                                            $aDot = $child->jenis_kelamin == '1' ? 'bg-blue-400 dark:bg-blue-500' : 'bg-pink-400 dark:bg-pink-500';
+                                        @endphp
+                                        <a href="{{ route('pengguna.bagan', $child->id) }}"
+                                           wire:click.prevent="switchUser('{{ $child->id }}')"
+                                           class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200/90 bg-white px-2 py-0.5 text-zinc-700 shadow-2xs transition-all hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-600 dark:border-zinc-700/80 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-indigo-700 dark:hover:bg-zinc-800/80 dark:hover:text-indigo-300">
+                                            <span class="text-[10px] font-bold text-zinc-400">{{ $index + 1 }}.</span>
+                                            <span class="inline-block h-1.5 w-1.5 rounded-full {{ $aDot }}"></span>
+                                            <span class="font-medium">{{ $child->name }}</span>
+                                            @if ($child->wafat)
+                                                <span class="rounded bg-red-100 px-1 py-0.5 text-[9px] font-semibold text-red-600 dark:bg-red-900/50 dark:text-red-400">Alm</span>
+                                            @endif
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+            @endif
+
             {{-- Table Content --}}
-            <div class="flex-1 overflow-x-auto p-4 sm:p-6 print:p-0">
+            <div class="flex-1 overflow-x-auto p-4 sm:p-6 print:p-0"
+                 wire:loading.class="opacity-60 transition-opacity duration-200 pointer-events-none">
                 <table class="w-full min-w-[760px] border-collapse border border-zinc-200 text-sm dark:border-zinc-700/80">
                     <tbody>
 
@@ -339,7 +465,7 @@ new class extends Component {
                                 @if ($kakekAyah)
                                     <div class="inline-flex items-center gap-1.5">
                                         <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400 dark:bg-blue-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $kakekAyah->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $kakekAyah->id) }}" wire:click.prevent="switchUser('{{ $kakekAyah->id }}')"
                                            class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $kakekAyah->name }}
                                         </a>
@@ -357,7 +483,7 @@ new class extends Component {
                                 @if ($nenekAyah)
                                     <div class="inline-flex items-center gap-1.5">
                                         <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-pink-400 dark:bg-pink-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $nenekAyah->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $nenekAyah->id) }}" wire:click.prevent="switchUser('{{ $nenekAyah->id }}')"
                                            class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $nenekAyah->name }}
                                         </a>
@@ -375,7 +501,7 @@ new class extends Component {
                                 @if ($kakekIbu)
                                     <div class="inline-flex items-center gap-1.5">
                                         <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400 dark:bg-blue-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $kakekIbu->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $kakekIbu->id) }}" wire:click.prevent="switchUser('{{ $kakekIbu->id }}')"
                                            class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $kakekIbu->name }}
                                         </a>
@@ -393,7 +519,7 @@ new class extends Component {
                                 @if ($nenekIbu)
                                     <div class="inline-flex items-center gap-1.5">
                                         <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-pink-400 dark:bg-pink-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $nenekIbu->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $nenekIbu->id) }}" wire:click.prevent="switchUser('{{ $nenekIbu->id }}')"
                                            class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $nenekIbu->name }}
                                         </a>
@@ -418,7 +544,7 @@ new class extends Component {
                                 @if ($ayah)
                                     <div class="inline-flex items-center gap-2">
                                         <span class="inline-block h-2 w-2 shrink-0 rounded-full bg-blue-400 dark:bg-blue-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $ayah->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $ayah->id) }}" wire:click.prevent="switchUser('{{ $ayah->id }}')"
                                            class="text-[15px] font-semibold text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $ayah->name }}
                                         </a>
@@ -436,7 +562,7 @@ new class extends Component {
                                 @if ($ibu)
                                     <div class="inline-flex items-center gap-2">
                                         <span class="inline-block h-2 w-2 shrink-0 rounded-full bg-pink-400 dark:bg-pink-500"></span>
-                                        <a href="{{ route('pengguna.bagan', $ibu->id) }}" wire:navigate
+                                        <a href="{{ route('pengguna.bagan', $ibu->id) }}" wire:click.prevent="switchUser('{{ $ibu->id }}')"
                                            class="text-[15px] font-semibold text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                                             {{ $ibu->name }}
                                         </a>
@@ -472,7 +598,7 @@ new class extends Component {
                                     @if (!empty($spouses))
                                         @foreach ($spouses as $sp)
                                             <span class="text-zinc-400 dark:text-zinc-500 font-semibold">&amp;</span>
-                                            <a href="{{ route('pengguna.bagan', $sp->id) }}" wire:navigate
+                                            <a href="{{ route('pengguna.bagan', $sp->id) }}" wire:click.prevent="switchUser('{{ $sp->id }}')"
                                                class="inline-flex items-center gap-2 rounded-lg bg-white/80 px-3 py-1.5 shadow-xs transition-colors hover:bg-white dark:bg-zinc-800/80 dark:hover:bg-zinc-800">
                                                 <span class="inline-block h-2 w-2 shrink-0 rounded-full {{ $sp->jenis_kelamin == '1' ? 'bg-blue-500' : 'bg-pink-500' }}"></span>
                                                 <span class="text-base font-semibold text-zinc-800 hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
@@ -512,7 +638,7 @@ new class extends Component {
                                                             <div class="flex items-center gap-1.5">
                                                                 <span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">{{ $index + 1 }}.</span>
                                                                 <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $cDot }}"></span>
-                                                                <a href="{{ route('pengguna.bagan', $item['child']->id) }}" wire:navigate
+                                                                <a href="{{ route('pengguna.bagan', $item['child']->id) }}" wire:click.prevent="switchUser('{{ $item['child']->id }}')"
                                                                    class="text-[13px] font-semibold text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400 truncate">
                                                                     {{ $item['child']->name }}
                                                                 </a>
@@ -539,7 +665,7 @@ new class extends Component {
                                                                             <div class="flex items-center gap-1.5 text-[12px]">
                                                                                 <span class="text-[11px] font-bold text-zinc-400">{{ $cIndex + 1 }}.</span>
                                                                                 <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $gDot }}"></span>
-                                                                                <a href="{{ route('pengguna.bagan', $cucu->id) }}" wire:navigate
+                                                                                <a href="{{ route('pengguna.bagan', $cucu->id) }}" wire:click.prevent="switchUser('{{ $cucu->id }}')"
                                                                                    class="text-zinc-700 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-300 dark:hover:text-blue-400 truncate">
                                                                                     {{ $cucu->name }}
                                                                                 </a>
@@ -591,7 +717,7 @@ new class extends Component {
                                                             <div class="flex items-center gap-1.5">
                                                                 <span class="text-xs font-bold text-indigo-500 dark:text-indigo-400">{{ $index + 1 }}.</span>
                                                                 <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $sDot }}"></span>
-                                                                <a href="{{ route('pengguna.bagan', $item['sibling']->id) }}" wire:navigate
+                                                                <a href="{{ route('pengguna.bagan', $item['sibling']->id) }}" wire:click.prevent="switchUser('{{ $item['sibling']->id }}')"
                                                                    class="text-[13px] font-semibold text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400 truncate">
                                                                     {{ $item['sibling']->name }}
                                                                 </a>
@@ -617,22 +743,22 @@ new class extends Component {
                                                                             @endphp
                                                                             <div>
                                                                                 <div class="flex items-center gap-1.5 text-[12px]">
-                                                                                    <span class="text-[11px] font-bold text-zinc-400">{{ $nIndex + 1 }}.</span>
-                                                                                    <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $kDot }}"></span>
-                                                                                    <a href="{{ route('pengguna.bagan', $nephewItem['keponakan']->id) }}" wire:navigate
-                                                                                       class="text-zinc-700 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-300 dark:hover:text-blue-400 truncate">
-                                                                                        {{ $nephewItem['keponakan']->name }}
-                                                                                    </a>
-                                                                                    @if ($nephewItem['keponakan']->wafat)
-                                                                                        <span class="rounded bg-red-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-red-600 dark:bg-red-900/40 dark:text-red-400">Alm</span>
-                                                                                    @endif
-                                                                                </div>
+                                                                                <span class="text-[11px] font-bold text-zinc-400">{{ $nIndex + 1 }}.</span>
+                                                                                <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $kDot }}"></span>
+                                                                                <a href="{{ route('pengguna.bagan', $nephewItem['keponakan']->id) }}" wire:click.prevent="switchUser('{{ $nephewItem['keponakan']->id }}')"
+                                                                                   class="text-zinc-700 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-300 dark:hover:text-blue-400 truncate">
+                                                                                    {{ $nephewItem['keponakan']->name }}
+                                                                                </a>
+                                                                                @if ($nephewItem['keponakan']->wafat)
+                                                                                    <span class="rounded bg-red-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-red-600 dark:bg-red-900/40 dark:text-red-400">Alm</span>
+                                                                                @endif
+                                                                            </div>
 
                                                                                 @if (!empty($nephewItem['cucu']))
                                                                                     <div class="ml-4 mt-0.5 space-y-0.5 border-l border-dashed border-zinc-200 pl-2 text-[11px] text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">
                                                                                         @foreach ($nephewItem['cucu'] as $cucuK)
                                                                                             <div>
-                                                                                                <a href="{{ route('pengguna.bagan', $cucuK->id) }}" wire:navigate
+                                                                                                <a href="{{ route('pengguna.bagan', $cucuK->id) }}" wire:click.prevent="switchUser('{{ $cucuK->id }}')"
                                                                                                    class="hover:underline hover:text-blue-600 dark:hover:text-blue-400">
                                                                                                     • {{ $cucuK->name }}
                                                                                                 </a>
@@ -687,7 +813,7 @@ new class extends Component {
                 <div class="p-6 print:p-0 print:pt-4">
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($deceasedList as $deceased)
-                            <a href="{{ route('pengguna.bagan', $deceased['id']) }}" wire:navigate
+                            <a href="{{ route('pengguna.bagan', $deceased['id']) }}" wire:click.prevent="switchUser('{{ $deceased['id'] }}')"
                                class="group flex items-center gap-3 rounded-xl border border-zinc-100 bg-zinc-50/50 p-3 transition-all hover:border-zinc-200 hover:bg-white hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-800/30 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 print:border-zinc-200 print:bg-transparent">
                                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700">
                                     @if($deceased['foto'])

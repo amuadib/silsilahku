@@ -24,7 +24,7 @@
         </span>
         <span class="flex items-center gap-1.5">
             <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $genderDot }}"></span>
-            <a href="{{ route('pengguna.show', $node['id']) }}" wire:navigate
+            <a href="{{ route('pengguna.daftar-v2', $node['id']) }}" wire:click.prevent="switchUser('{{ $node['id'] }}')"
                class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                 {{ $node['name'] }}
             </a>
@@ -64,7 +64,7 @@
                 {{-- Anggota utama --}}
                 <span class="flex items-center gap-1.5">
                     <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $genderDot }}"></span>
-                    <a href="{{ route('pengguna.show', $node['id']) }}" wire:navigate
+                    <a href="{{ route('pengguna.daftar-v2', $node['id']) }}" wire:click.prevent="switchUser('{{ $node['id'] }}')"
                        class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                         {{ $node['name'] }}
                     </a>
@@ -88,7 +88,7 @@
                     {{-- Pasangan --}}
                     <span class="flex items-center gap-1.5">
                         <span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full {{ $spouseGenderDot }}"></span>
-                        <a href="{{ route('pengguna.show', $marriage['spouse']['id']) }}" wire:navigate
+                        <a href="{{ route('pengguna.daftar-v2', $marriage['spouse']['id']) }}" wire:click.prevent="switchUser('{{ $marriage['spouse']['id'] }}')"
                            class="text-[14px] font-medium text-zinc-800 transition-colors hover:text-blue-600 hover:underline dark:text-zinc-200 dark:hover:text-blue-400">
                             {{ $marriage['spouse']['name'] }}
                         </a>
