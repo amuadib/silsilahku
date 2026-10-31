@@ -441,7 +441,7 @@ new class extends Component
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Silsilah Keluarga</p>
+                            <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Silsilah Keluarga {{ $user->name }}</p>
                             <p class="text-xs text-zinc-500 dark:text-zinc-400">Nomor urut mengikuti garis keturunan</p>
                         </div>
                     </div>

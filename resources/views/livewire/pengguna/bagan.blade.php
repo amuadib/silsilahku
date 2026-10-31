@@ -349,7 +349,7 @@ new class extends Component {
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Bagan Silsilah Keluarga</p>
+                            <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Bagan Silsilah Keluarga {{ $user->name }}</p>
                             <p class="text-xs text-zinc-500 dark:text-zinc-400">Hubungan kakek/nenek, orang tua, pasangan, anak/cucu, dan saudara</p>
                         </div>
                     </div>
